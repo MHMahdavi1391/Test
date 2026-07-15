@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Glass Assistant</title>
+
+<style>
+body {
+    background: #111;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+    padding: 30px;
+}
+
+button {
+    font-size: 20px;
+    padding: 12px 25px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.box {
+    margin-top: 20px;
+    font-size: 22px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🤖 Smart Glass Assistant</h1>
+
+<button onclick="startListening()">🎤 Speak</button>
+<button onclick="stopListening()">⛔ Stop</button>
+
+<div class="box" id="status">
+Ready
+</div>
+
+<div class="box" id="text">
+</div>
+
+<div class="box" id="reply">
+</div>
+
+
+<script>
+
+let recognition;
+let active = false;
+
+
+// Voice Output
+
+function speak(message){
+
+    let speech = new SpeechSynthesisUtterance(message);
+
+    speech.lang = "en-US";
+    speech.rate = 1;
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
+
+}
+
+
+
+// AI Brain
+
+function assistant(message){
+
+    let m = message.toLowerCase();
+
+    let answer = "Sorry, I don't understand.";
+
+    
+    if(m.includes("hello") || m.includes("hi")){
+        answer = "Hello. Smart glass is ready.";
+    }
+
+
+    else if(m.includes("time")){
+        answer = "The time is " +
+        new Date().toLocaleTimeString();
+    }
+
+
+    else if(m.includes("date")){
+        answer = "Today is " +
+        new Date().toDateString();
+    }
+
+
+    else if(m.includes("your name")){
+        answer = "I am your smart glass assistant.";
+    }
+
+
+    else if(m.includes("battery")){
+        answer = "Battery sensor is not connected.";
+    }
+
+
+    else if(m.includes("record")){
+        answer = "Recording command received.";
+    }
+
+
+    document.getElementById("reply").innerHTML =
+    answer;
+
+
+    speak(answer);
+
+}
+
+
+
+// Start Speech Recognition
+
+function startListening(){
+
+
+    const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+    if(!SpeechRecognition){
+
+        document.getElementById("status").innerHTML =
+        "Speech recognition unavailable. Use Chrome.";
+
+        return;
+    }
+
+
+
+    if(active) return;
+
+
+
+    recognition = new SpeechRecognition();
+
+
+    recognition.lang = "en-US";
+
+    recognition.continuous = false;
+
+    recognition.interimResults = false;
+
+
+
+    recognition.onstart = function(){
+
+        active = true;
+
+        document.getElementById("status").innerHTML =
+        "Listening...";
+
+    };
+
+
+
+    recognition.onresult = function(event){
+
+
+        let result =
+        event.results[0][0].transcript;
+
+
+        document.getElementById("text").innerHTML =
+        "You said: " + result;
+
+
+        assistant(result);
+
+
+    };
+
+
+
+    recognition.onerror = function(event){
+
+        document.getElementById("status").innerHTML =
+        "Error: " + event.error;
+
+    };
+
+
+
+    recognition.onend = function(){
+
+        active = false;
+
+        document.getElementById("status").innerHTML =
+        "Ready";
+
+    };
+
+
+
+    recognition.start();
+
+}
+
+
+
+// Stop
+
+function stopListening(){
+
+    if(recognition){
+
+        recognition.stop();
+
+    }
+
+}
+
+</script>
+
+
+</body>
+</html>
