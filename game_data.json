@@ -1,6 +1,6 @@
 {
   "game": {
-    "title": "My Game",
+    "title": "007 First Light",
     "subtitle": "Created by LTC",
     "genre": "Action · Adventure",
     "version": "2.4.1",
@@ -14,13 +14,13 @@
   "features": [
     {
       "icon": "🌍",
-      "name": "Open World",
+      "name": "beautiful world",
       "description": "Explore a seamless world with endless possibilities."
     },
     {
-      "icon": "👥",
-      "name": "Multiplayer",
-      "description": "Team up with friends in co-op and competitive modes."
+      "icon": "☠️",
+      "name": "Death",
+      "description": "War For England."
     },
     {
       "icon": "✨",
@@ -49,8 +49,6 @@
   },
   "screenshots": [
     "ss1.jpg",
-    "ss2.jpg",
-    "ss3.jpg",
-    "ss4.jpg"
+    "ss2.jpg"
   ]
 }
