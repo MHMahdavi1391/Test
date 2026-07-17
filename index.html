@@ -1,230 +1,399 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Smart Glass Assistant</title>
-
-<style>
-body {
-    background: #111;
-    color: white;
-    font-family: Arial;
-    text-align: center;
-    padding: 30px;
-}
-
-button {
-    font-size: 20px;
-    padding: 12px 25px;
-    margin: 10px;
-    border-radius: 10px;
-}
-
-.box {
-    margin-top: 20px;
-    font-size: 22px;
-}
-</style>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لانچر بازی</title>
+    <style>
+        /* استایل‌ها به صورت خلاصه (همون استایل‌های قبلی) */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: #0b0d15;
+            color: #f1f5f9;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 24px;
+            line-height: 1.6;
+        }
+        .app { max-width: 1280px; margin: 0 auto; }
+        .hero { position:relative; border-radius:20px; overflow:hidden; margin-bottom:40px; min-height:400px; background:#0a0c14; }
+        .hero-image { width:100%; min-height:400px; object-fit:cover; display:block; }
+        .hero-overlay { position:absolute; inset:0; background:linear-gradient(135deg, rgba(11,13,21,0.88), rgba(11,13,21,0.4), rgba(11,13,21,0.75)); display:flex; flex-direction:column; justify-content:flex-end; padding:48px 52px; }
+        .hero-title { font-size:clamp(2.4rem,7vw,4.8rem); font-weight:800; background:linear-gradient(135deg,#fff 30%,#94a3b8 80%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .hero-subtitle { color:#94a3b8; font-size:1.2rem; }
+        .hero-subtitle span { color:#4a7cf7; }
+        .hero-meta { display:flex; flex-wrap:wrap; gap:18px 30px; font-size:0.85rem; color:#94a3b8; margin:12px 0 24px; }
+        .hero-meta-item .label { color:#64748b; }
+        .hero-meta-item .value { color:#f1f5f9; font-weight:500; }
+        .btn-install { background:linear-gradient(135deg,#4a7cf7,#8b5cf6); border:none; color:#fff; padding:14px 40px; border-radius:60px; font-weight:700; cursor:pointer; transition:0.3s; box-shadow:0 8px 32px rgba(74,124,247,0.35); }
+        .btn-install:hover { transform:translateY(-3px); box-shadow:0 16px 48px rgba(74,124,247,0.5); }
+        .section-header { display:flex; align-items:center; gap:14px; margin:40px 0 22px; }
+        .section-header h2 { font-size:1.6rem; font-weight:700; background:linear-gradient(135deg,#f1f5f9,#94a3b8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .section-header .accent-line { flex:1; height:2px; background:linear-gradient(90deg,#4a7cf7,transparent); opacity:0.25; border-radius:4px; }
+        .gallery-scroll { display:flex; gap:20px; overflow-x:auto; padding:8px 4px 16px; }
+        .gallery-item { flex:0 0 320px; border-radius:12px; overflow:hidden; cursor:pointer; background:#11141f; border:1px solid rgba(255,255,255,0.07); transition:0.3s; }
+        .gallery-item:hover { transform:translateY(-6px); box-shadow:0 20px 48px rgba(0,0,0,0.6); }
+        .gallery-item img { width:100%; height:200px; object-fit:cover; display:block; }
+        .gallery-item .placeholder-img { width:100%; height:200px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#1a1f2e,#0f121e); color:#64748b; border:2px dashed rgba(255,255,255,0.07); }
+        .gallery-overlay { position:absolute; inset:0; background:rgba(11,13,21,0.3); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; opacity:0; transition:0.35s; }
+        .gallery-item:hover .gallery-overlay { opacity:1; }
+        .gallery-overlay span { background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.12); padding:8px 22px; border-radius:40px; color:#fff; font-size:0.8rem; }
+        .desc-card { background:rgba(255,255,255,0.04); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:36px 40px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.8); }
+        .desc-card h3 { font-size:1.3rem; margin-bottom:12px; }
+        .desc-card p { color:#94a3b8; max-width:780px; }
+        .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+        .feature-card { background:rgba(255,255,255,0.04); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:28px 22px; text-align:center; transition:0.3s; }
+        .feature-card:hover { transform:translateY(-8px); border-color:rgba(74,124,247,0.2); box-shadow:0 20px 48px rgba(0,0,0,0.5); }
+        .feature-icon { font-size:2.6rem; display:block; margin-bottom:10px; }
+        .feature-card h4 { font-size:1.05rem; color:#f1f5f9; }
+        .feature-card p { color:#64748b; font-size:0.85rem; }
+        .sys-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+        .sys-card { background:rgba(255,255,255,0.04); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:28px 30px; }
+        .sys-card h4 { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+        .sys-card .badge { font-size:0.65rem; font-weight:600; text-transform:uppercase; padding:2px 14px; border-radius:40px; background:rgba(74,124,247,0.15); color:#4a7cf7; border:1px solid rgba(74,124,247,0.12); }
+        .sys-card ul { list-style:none; display:flex; flex-direction:column; gap:8px; }
+        .sys-card li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+        .sys-card .sys-label { color:#64748b; }
+        .sys-card .sys-value { color:#f1f5f9; font-weight:500; }
+        .sys-card.rec .sys-value { color:#4a7cf7; }
+        .footer { margin-top:40px; padding:28px 0; text-align:center; border-top:1px solid rgba(255,255,255,0.07); color:#64748b; }
+        .footer span { color:#4a7cf7; }
+        .error-box { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:16px 24px; margin-bottom:28px; color:#fca5a5; display:none; align-items:center; gap:16px; flex-wrap:wrap; }
+        .error-box.show { display:flex; }
+        .error-box button { background:#4a7cf7; border:none; color:#fff; padding:6px 20px; border-radius:40px; cursor:pointer; font-weight:600; }
+        .error-box button:hover { background:#8b5cf6; }
+        /* مودال */
+        .modal { position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.88); backdrop-filter:blur(28px); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:0.4s; }
+        .modal.open { opacity:1; visibility:visible; }
+        .modal-content { max-width:90vw; max-height:90vh; border-radius:20px; overflow:hidden; background:#11141f; border:1px solid rgba(255,255,255,0.07); transform:scale(0.92); transition:0.45s cubic-bezier(0.22,1,0.36,1); }
+        .modal.open .modal-content { transform:scale(1); }
+        .modal-content img { max-width:100%; max-height:85vh; display:block; }
+        .modal-close { position:absolute; top:16px; right:16px; width:44px; height:44px; border-radius:50%; border:none; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px); color:#fff; font-size:1.6rem; cursor:pointer; transition:0.25s; display:flex; align-items:center; justify-content:center; }
+        .modal-close:hover { transform:rotate(90deg) scale(1.08); background:rgba(255,255,255,0.12); }
+        .modal-placeholder { padding:60px 80px; text-align:center; color:#94a3b8; }
+        .modal-placeholder .icon-big { font-size:4rem; display:block; margin-bottom:16px; opacity:0.3; }
+        @media (max-width:600px) { .hero-overlay { padding:24px; } .gallery-item { flex:0 0 240px; } .sys-grid { grid-template-columns:1fr; } }
+    </style>
 </head>
-
 <body>
 
-<h1>🤖 Smart Glass Assistant</h1>
+<div class="app" id="app">
 
-<button onclick="startListening()">🎤 Speak</button>
-<button onclick="stopListening()">⛔ Stop</button>
+    <!-- باکس خطا -->
+    <div class="error-box" id="errorBox">
+        <span>⚠️</span>
+        <span id="errorText">خطا در بارگذاری فایل JSON</span>
+        <button id="retryBtn">تلاش مجدد</button>
+    </div>
 
-<div class="box" id="status">
-Ready
+    <!-- هیرو -->
+    <section class="hero">
+        <img class="hero-image" src="cover.jpg" alt="cover" onerror="this.style.display='none'" />
+        <div class="hero-overlay">
+            <div class="hero-badge" style="display:inline-block;background:rgba(74,124,247,0.18);padding:4px 18px;border-radius:40px;font-size:0.7rem;color:#4a7cf7;margin-bottom:12px;width:fit-content;">✦ Now Available</div>
+            <h1 class="hero-title" id="heroTitle">...</h1>
+            <p class="hero-subtitle" id="heroSubtitle">...</p>
+            <div class="hero-meta">
+                <span class="hero-meta-item"><span class="label">Genre</span> <span class="value" id="metaGenre">...</span></span>
+                <span class="hero-meta-item"><span class="label">Version</span> <span class="value" id="metaVersion">...</span></span>
+                <span class="hero-meta-item"><span class="label">Size</span> <span class="value" id="metaSize">...</span></span>
+                <span class="hero-meta-item"><span class="label">Release</span> <span class="value" id="metaRelease">...</span></span>
+            </div>
+            <div class="hero-actions">
+                <button class="btn-install" id="installBtn">⬇ Install</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- گالری -->
+    <section class="gallery-section">
+        <div class="section-header"><h2>Screenshots</h2><div class="accent-line"></div></div>
+        <div class="gallery-scroll" id="galleryScroll"></div>
+    </section>
+
+    <!-- توضیحات -->
+    <section class="desc-section">
+        <div class="desc-card">
+            <h3 id="descHeading">...</h3>
+            <p id="descText">...</p>
+        </div>
+    </section>
+
+    <!-- ویژگی‌ها -->
+    <section class="features-section">
+        <div class="section-header"><h2>Features</h2><div class="accent-line"></div></div>
+        <div class="features-grid" id="featuresGrid"></div>
+    </section>
+
+    <!-- سیستم مورد نیاز -->
+    <section class="sys-section">
+        <div class="section-header"><h2>System Requirements</h2><div class="accent-line"></div></div>
+        <div class="sys-grid">
+            <div class="sys-card min"><h4>Minimum <span class="badge">Low</span></h4><ul id="minReqs"></ul></div>
+            <div class="sys-card rec"><h4>Recommended <span class="badge">High</span></h4><ul id="recReqs"></ul></div>
+        </div>
+    </section>
+
+    <footer class="footer">Created with <span>❤</span> by <span>LTC</span> &bull; 2026</footer>
 </div>
 
-<div class="box" id="text">
+<!-- مودال -->
+<div class="modal" id="imageModal">
+    <div class="modal-content">
+        <button class="modal-close" id="modalClose">✕</button>
+        <img id="modalImg" src="" style="display:none;" />
+        <div class="modal-placeholder" id="modalPlaceholder" style="display:none;">
+            <span class="icon-big">🖼</span>
+            <p>تصویر در دسترس نیست</p>
+        </div>
+    </div>
 </div>
-
-<div class="box" id="reply">
-</div>
-
 
 <script>
-
-let recognition;
-let active = false;
-
-
-// Voice Output
-
-function speak(message){
-
-    let speech = new SpeechSynthesisUtterance(message);
-
-    speech.lang = "en-US";
-    speech.rate = 1;
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(speech);
-
-}
-
-
-
-// AI Brain
-
-function assistant(message){
-
-    let m = message.toLowerCase();
-
-    let answer = "Sorry, I don't understand.";
-
-    
-    if(m.includes("hello") || m.includes("hi")){
-        answer = "Hello. Smart glass is ready.";
-    }
-
-
-    else if(m.includes("time")){
-        answer = "The time is " +
-        new Date().toLocaleTimeString();
-    }
-
-
-    else if(m.includes("date")){
-        answer = "Today is " +
-        new Date().toDateString();
-    }
-
-
-    else if(m.includes("your name")){
-        answer = "I am your smart glass assistant.";
-    }
-
-
-    else if(m.includes("battery")){
-        answer = "Battery sensor is not connected.";
-    }
-
-
-    else if(m.includes("record")){
-        answer = "Recording command received.";
-    }
-
-
-    document.getElementById("reply").innerHTML =
-    answer;
-
-
-    speak(answer);
-
-}
-
-
-
-// Start Speech Recognition
-
-function startListening(){
-
-
-    const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-
-    if(!SpeechRecognition){
-
-        document.getElementById("status").innerHTML =
-        "Speech recognition unavailable. Use Chrome.";
-
-        return;
-    }
-
-
-
-    if(active) return;
-
-
-
-    recognition = new SpeechRecognition();
-
-
-    recognition.lang = "en-US";
-
-    recognition.continuous = false;
-
-    recognition.interimResults = false;
-
-
-
-    recognition.onstart = function(){
-
-        active = true;
-
-        document.getElementById("status").innerHTML =
-        "Listening...";
-
-    };
-
-
-
-    recognition.onresult = function(event){
-
-
-        let result =
-        event.results[0][0].transcript;
-
-
-        document.getElementById("text").innerHTML =
-        "You said: " + result;
-
-
-        assistant(result);
-
-
-    };
-
-
-
-    recognition.onerror = function(event){
-
-        document.getElementById("status").innerHTML =
-        "Error: " + event.error;
-
-    };
-
-
-
-    recognition.onend = function(){
-
-        active = false;
-
-        document.getElementById("status").innerHTML =
-        "Ready";
-
-    };
-
-
-
-    recognition.start();
-
-}
-
-
-
-// Stop
-
-function stopListening(){
-
-    if(recognition){
-
-        recognition.stop();
-
-    }
-
-}
-
+    (function() {
+        'use strict';
+
+        // المان‌ها
+        const heroTitle = document.getElementById('heroTitle');
+        const heroSubtitle = document.getElementById('heroSubtitle');
+        const metaGenre = document.getElementById('metaGenre');
+        const metaVersion = document.getElementById('metaVersion');
+        const metaSize = document.getElementById('metaSize');
+        const metaRelease = document.getElementById('metaRelease');
+        const descHeading = document.getElementById('descHeading');
+        const descText = document.getElementById('descText');
+        const featuresGrid = document.getElementById('featuresGrid');
+        const minReqs = document.getElementById('minReqs');
+        const recReqs = document.getElementById('recReqs');
+        const galleryScroll = document.getElementById('galleryScroll');
+        const errorBox = document.getElementById('errorBox');
+        const errorText = document.getElementById('errorText');
+        const retryBtn = document.getElementById('retryBtn');
+
+        // تابع برای نمایش خطا
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorBox.classList.add('show');
+        }
+
+        function hideError() {
+            errorBox.classList.remove('show');
+        }
+
+        // تابع اعمال داده‌ها به صفحه
+        function applyData(data) {
+            // هیرو
+            heroTitle.textContent = data.game.title || 'بدون عنوان';
+            const sub = data.game.subtitle || '';
+            const match = sub.match(/^(Created by )(.+)$/);
+            if (match) {
+                heroSubtitle.innerHTML = match[1] + '<span>' + match[2] + '</span>';
+            } else {
+                heroSubtitle.textContent = sub;
+            }
+            metaGenre.textContent = data.game.genre || '—';
+            metaVersion.textContent = data.game.version || '—';
+            metaSize.textContent = data.game.size || '—';
+            metaRelease.textContent = data.game.release || '—';
+
+            // توضیحات
+            descHeading.textContent = data.description.heading || 'درباره بازی';
+            descText.textContent = data.description.text || 'توضیحی موجود نیست.';
+
+            // ویژگی‌ها
+            featuresGrid.innerHTML = '';
+            if (data.features && Array.isArray(data.features)) {
+                data.features.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'feature-card';
+                    card.innerHTML = `
+                        <span class="feature-icon">${f.icon || '❓'}</span>
+                        <h4>${f.name || ''}</h4>
+                        <p>${f.description || ''}</p>
+                    `;
+                    featuresGrid.appendChild(card);
+                });
+            }
+
+            // سیستم مورد نیاز
+            function populateReqs(ul, reqObj) {
+                ul.innerHTML = '';
+                const labels = { CPU: 'CPU', RAM: 'RAM', GPU: 'GPU', Storage: 'Storage' };
+                for (const [key, value] of Object.entries(reqObj)) {
+                    if (labels[key]) {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span class="sys-label">${labels[key]}</span><span class="sys-value">${value}</span>`;
+                        ul.appendChild(li);
+                    }
+                }
+            }
+            if (data.requirements) {
+                populateReqs(minReqs, data.requirements.minimum || {});
+                populateReqs(recReqs, data.requirements.recommended || {});
+            }
+
+            // گالری
+            galleryScroll.innerHTML = '';
+            const screenshots = data.screenshots || [];
+            if (screenshots.length === 0) {
+                const empty = document.createElement('div');
+                empty.textContent = 'هیچ اسکرین‌شاتی موجود نیست.';
+                empty.style.cssText = 'padding:20px;color:#64748b;text-align:center;width:100%;';
+                galleryScroll.appendChild(empty);
+            } else {
+                screenshots.forEach((src, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.dataset.src = src;
+                    item.dataset.alt = `Screenshot ${idx+1}`;
+
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = `Screenshot ${idx+1}`;
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        this.nextElementSibling.style.display = 'flex';
+                    };
+
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'placeholder-img';
+                    placeholder.style.display = 'none';
+                    placeholder.textContent = `📷 ${src}`;
+
+                    const overlay = document.createElement('div');
+                    overlay.className = 'gallery-overlay';
+                    overlay.innerHTML = '<span>↗ View</span>';
+
+                    item.appendChild(img);
+                    item.appendChild(placeholder);
+                    item.appendChild(overlay);
+                    galleryScroll.appendChild(item);
+                });
+            }
+
+            hideError();
+        }
+
+        // تابع بارگذاری JSON
+        function loadJSON() {
+            hideError();
+
+            fetch('game_data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status} - فایل پیدا نشد`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    let json;
+                    try {
+                        json = JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('فرمت JSON نامعتبر: ' + e.message);
+                    }
+                    // بررسی ساختار
+                    if (!json.game || !json.description || !json.features || !json.requirements) {
+                        throw new Error('ساختار JSON ناقص است (کmissing key)');
+                    }
+                    applyData(json);
+                    console.log('✅ داده‌ها با موفقیت بارگذاری شدند.');
+                })
+                .catch(err => {
+                    console.error('❌ خطا در بارگذاری JSON:', err);
+                    showError('❌ ' + err.message + ' — لطفاً فایل game_data.json را بررسی کنید.');
+                    // پاک کردن محتوای صفحه تا داده‌های پیش‌فرض نشان داده نشود
+                    heroTitle.textContent = 'خطا';
+                    heroSubtitle.textContent = 'لطفاً فایل JSON را بررسی کنید';
+                    metaGenre.textContent = '—';
+                    metaVersion.textContent = '—';
+                    metaSize.textContent = '—';
+                    metaRelease.textContent = '—';
+                    descHeading.textContent = 'خطا';
+                    descText.textContent = 'داده‌ها بارگذاری نشدند.';
+                    featuresGrid.innerHTML = '';
+                    minReqs.innerHTML = '';
+                    recReqs.innerHTML = '';
+                    galleryScroll.innerHTML = '<div style="padding:20px;color:#64748b;">اسکرین‌شات‌ها در دسترس نیستند.</div>';
+                });
+        }
+
+        // بارگذاری اولیه
+        loadJSON();
+
+        // دکمه تلاش مجدد
+        retryBtn.addEventListener('click', loadJSON);
+
+        // ─── دکمه Install ───
+        const installBtn = document.getElementById('installBtn');
+        installBtn.addEventListener('click', function() {
+            if (this.classList.contains('installing')) return;
+            this.classList.add('installing');
+            this.textContent = '⏳ Installing…';
+            setTimeout(() => {
+                this.textContent = '✅ Installed';
+                this.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                setTimeout(() => {
+                    this.style.background = '';
+                    this.textContent = '⬇ Install';
+                    this.classList.remove('installing');
+                }, 3000);
+            }, 2000);
+        });
+
+        // ─── مودال گالری ───
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        const modalPlaceholder = document.getElementById('modalPlaceholder');
+        const modalClose = document.getElementById('modalClose');
+
+        function openModal(src, alt) {
+            modalImg.style.display = 'none';
+            modalPlaceholder.style.display = 'none';
+            if (src && src.trim()) {
+                const img = new Image();
+                img.onload = function() {
+                    modalImg.src = src;
+                    modalImg.alt = alt || '';
+                    modalImg.style.display = 'block';
+                    modal.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                };
+                img.onerror = function() {
+                    modalPlaceholder.querySelector('p').textContent = 'خطا در بارگذاری: ' + src;
+                    modalPlaceholder.style.display = 'block';
+                    modal.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                };
+                img.src = src;
+            } else {
+                modalPlaceholder.querySelector('p').textContent = 'تصویری وجود ندارد.';
+                modalPlaceholder.style.display = 'block';
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+            setTimeout(() => { if (!modal.classList.contains('open')) modalImg.src = ''; }, 400);
+        }
+
+        galleryScroll.addEventListener('click', function(e) {
+            const item = e.target.closest('.gallery-item');
+            if (item) {
+                const src = item.dataset.src || '';
+                const alt = item.dataset.alt || 'Screenshot';
+                openModal(src, alt);
+            }
+        });
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+    })();
 </script>
-
 
 </body>
 </html>
