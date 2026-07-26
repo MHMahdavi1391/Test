@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LTC Launcher</title>
     <style>
-        /* ----- RESET & BASE ----- */
         * {
             margin: 0;
             padding: 0;
@@ -42,7 +41,7 @@
             color: var(--text-primary);
         }
 
-        /* ----- DYNAMIC BACKGROUND (Liquid Glass) ----- */
+        /* ----- DYNAMIC BACKGROUND ----- */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -150,7 +149,7 @@
             letter-spacing: 0.3px;
         }
 
-        /* ----- MAIN ROW (Horizontal) ----- */
+        /* ----- MAIN ROW ----- */
         #main-wrap {
             flex: 1;
             overflow-x: auto;
@@ -161,7 +160,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* مرکز چینش افقی */
         }
 
         #main-wrap::-webkit-scrollbar {
@@ -185,7 +183,7 @@
             justify-content: center;
         }
 
-        /* ----- APP CARD (بزرگ و مناسب) ----- */
+        /* ----- APP CARD ----- */
         .app-card {
             flex: 0 0 200px;
             background: var(--glass-bg);
@@ -220,6 +218,14 @@
             transition: var(--transition);
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+
+        .app-card .icon-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 22px;
         }
 
         .app-card .icon-wrap .glass-ring {
@@ -251,7 +257,7 @@
             white-space: nowrap;
         }
 
-        /* ----- FOCUS STATE (Android TV style) ----- */
+        /* ----- FOCUS STATE ----- */
         .app-card.focused {
             border-color: var(--primary) !important;
             transform: scale(1.08) translateY(-6px);
@@ -312,12 +318,7 @@
             letter-spacing: 0.3px;
         }
 
-        /* ----- HIDDEN FILE INPUT ----- */
-        #file-input {
-            display: none;
-        }
-
-        /* ----- TOAST (Liquid Glass) ----- */
+        /* ----- TOAST ----- */
         #toast {
             position: fixed;
             bottom: 100px;
@@ -390,7 +391,6 @@
             }
             #app-row {
                 gap: 18px;
-                padding: 0 8px;
             }
         }
 
@@ -427,6 +427,11 @@
                 gap: 12px;
             }
         }
+
+        /* ----- HIDDEN FILE INPUT ----- */
+        #file-input {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -441,7 +446,7 @@
         <span id="toast-msg">آماده</span>
     </div>
 
-    <!-- ===== FILE INPUT (hidden) ===== -->
+    <!-- ===== FILE INPUT ===== -->
     <input type="file" id="file-input" accept=".exe" multiple />
 
     <!-- ===== APP ===== -->
@@ -471,15 +476,13 @@
             </div>
         </div>
 
-        <!-- MAIN ROW (Horizontal) -->
+        <!-- MAIN ROW -->
         <div id="main-wrap">
             <div id="app-row">
-                <!-- کارت افزودن + -->
                 <div class="add-card" id="add-btn">
                     <div class="add-icon">+</div>
                     <div class="add-label">افزودن برنامه</div>
                 </div>
-                <!-- کارت‌های برنامه‌ها به صورت پویا اضافه می‌شوند -->
             </div>
         </div>
 
@@ -508,7 +511,7 @@
         const toastIcon = document.getElementById('toast-icon');
 
         // ================================================================
-        //  AUDIO FX (Web Audio)
+        //  AUDIO FX
         // ================================================================
         function initAudio() {
             try {
@@ -559,7 +562,52 @@
         }
 
         // ================================================================
-        //  LOAD / SAVE (localStorage)
+        //  EXTRACT ICON FROM EXE (با استفاده از FileReader)
+        // ================================================================
+        function extractIconFromExe(file) {
+            return new Promise((resolve) => {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            // سعی در استخراج آیکون از فایل
+                            const buffer = e.target.result;
+                            const view = new DataView(buffer);
+
+                            // بررسی امضای PE
+                            const peOffset = view.getUint32(0x3C, true);
+                            const signature = view.getUint32(peOffset, true);
+
+                            if (signature === 0x00004550) { // "PE\0\0"
+                                // سعی در پیدا کردن منابع آیکون
+                                const resourceOffset = peOffset + 0x88;
+                                const resourceRVA = view.getUint32(resourceOffset, true);
+                                const resourceSize = view.getUint32(resourceOffset + 4, true);
+
+                                if (resourceRVA > 0 && resourceSize > 0) {
+                                    // آیکون پیدا شد، اما استخراج واقعی نیاز به پردازش بیشتر دارد
+                                    // در مرورگر نمی‌توانیم به راحتی آیکون را استخراج کنیم
+                                    resolve(null);
+                                    return;
+                                }
+                            }
+                            resolve(null);
+                        } catch (err) {
+                            resolve(null);
+                        }
+                    };
+                    reader.onerror = function() {
+                        resolve(null);
+                    };
+                    reader.readAsArrayBuffer(file);
+                } catch (err) {
+                    resolve(null);
+                }
+            });
+        }
+
+        // ================================================================
+        //  LOAD / SAVE
         // ================================================================
         function loadApps() {
             try {
@@ -568,7 +616,8 @@
                     apps = JSON.parse(data);
                     apps = apps.map(a => ({
                         ...a,
-                        icon: a.icon || '📄'
+                        icon: a.icon || '📄',
+                        iconData: a.iconData || null
                     }));
                 } else {
                     apps = [];
@@ -596,12 +645,19 @@
                 const card = document.createElement('div');
                 card.className = 'app-card';
                 card.dataset.index = idx;
-                card.dataset.path = app.path;
 
-                const iconEmoji = app.icon || '📄';
+                let iconHtml = '';
+                if (app.iconData) {
+                    iconHtml = `<img src="${app.iconData}" alt="${app.name}" />`;
+                } else if (app.icon && app.icon.startsWith('data:image')) {
+                    iconHtml = `<img src="${app.icon}" alt="${app.name}" />`;
+                } else {
+                    iconHtml = `<span>${app.icon || '📄'}</span>`;
+                }
+
                 card.innerHTML = `
               <div class="icon-wrap" style="background:#2c3e50;">
-                <span>${iconEmoji}</span>
+                ${iconHtml}
                 <div class="glass-ring"></div>
               </div>
               <div class="app-name">${app.name}</div>
@@ -617,7 +673,6 @@
                     }
                 });
 
-                // حذف با کلیک راست
                 card.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     removeApp(idx);
@@ -647,16 +702,87 @@
         // ================================================================
         //  ADD APP
         // ================================================================
-        function addApp(file) {
+        async function addApp(file) {
             if (!file) return;
             const name = file.name.replace(/\.exe$/i, '');
             const path = file.path || file.webkitRelativePath || file.name;
+
+            // استخراج آیکون
+            let icon = '📄';
+            let iconData = null;
+
+            try {
+                // تلاش برای استخراج آیکون از فایل
+                const extractedIcon = await extractIconFromExe(file);
+                if (extractedIcon) {
+                    iconData = extractedIcon;
+                    icon = '';
+                }
+            } catch (_) {}
+
+            // اگر آیکون استخراج نشد، از نام برنامه استفاده می‌کنیم
+            if (!iconData) {
+                const iconMap = {
+                    'chrome': '🌐',
+                    'firefox': '🦊',
+                    'edge': '🌊',
+                    'notepad': '📝',
+                    'explorer': '📂',
+                    'cmd': '💻',
+                    'powershell': '⚡',
+                    'settings': '⚙️',
+                    'code': '📄',
+                    'visual studio': '🔧',
+                    'steam': '🎮',
+                    'spotify': '🎵',
+                    'discord': '💬',
+                    'telegram': '✈️',
+                    'whatsapp': '💚',
+                    'photoshop': '🎨',
+                    'illustrator': '✏️',
+                    'premiere': '🎬',
+                    'after effects': '🎞️',
+                    'word': '📄',
+                    'excel': '📊',
+                    'powerpoint': '📽️',
+                    'outlook': '✉️',
+                    'calculator': '🧮',
+                    'paint': '🎨',
+                    'notepad++': '📝',
+                    'vlc': '📺',
+                    'mpc': '🎬',
+                    'winrar': '📦',
+                    '7zip': '🗜️',
+                    'utorrent': '⬇️',
+                    'qbit': '⬇️',
+                    'telegram': '✈️',
+                    'whatsapp': '💚',
+                    'skype': '💬',
+                    'zoom': '📹',
+                    'teamviewer': '🖥️',
+                    'anydesk': '🖥️'
+                };
+
+                const lowerName = name.toLowerCase();
+                let found = false;
+                for (const [key, value] of Object.entries(iconMap)) {
+                    if (lowerName.includes(key)) {
+                        icon = value;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    icon = '📄';
+                }
+            }
 
             const newApp = {
                 id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
                 name: name,
                 path: path,
-                icon: '📄'
+                icon: icon,
+                iconData: iconData
             };
 
             apps.push(newApp);
@@ -681,18 +807,49 @@
         }
 
         // ================================================================
-        //  LAUNCH APP
+        //  LAUNCH APP (اجرای واقعی)
         // ================================================================
         function launchApp(app) {
             playSound('launch');
-            showToast(`🚀  ${app.name}  در حال اجرا`, '⚡');
+            showToast(`🚀  ${app.name}  در حال اجرا...`, '⚡');
+
             try {
-                const win = window.open(`file:///${app.path.replace(/\\/g, '/')}`, '_blank');
-                if (!win || win.closed) {
-                    window.location.href = `file:///${app.path.replace(/\\/g, '/')}`;
+                // روش‌های مختلف برای اجرای برنامه
+                const path = app.path;
+
+                // 1. استفاده از shell: در ویندوز
+                if (window.navigator && window.navigator.msLaunchUri) {
+                    window.navigator.msLaunchUri(`file:///${path.replace(/\\/g, '/')}`);
+                    return;
                 }
+
+                // 2. استفاده از window.open
+                const win = window.open(`file:///${path.replace(/\\/g, '/')}`, '_blank');
+                if (win && !win.closed) {
+                    return;
+                }
+
+                // 3. استفاده از location.href
+                window.location.href = `file:///${path.replace(/\\/g, '/')}`;
+
+                // 4. اگر در محیط Electron هستیم
+                if (window.require) {
+                    const { shell } = window.require('electron');
+                    shell.openPath(path);
+                    return;
+                }
+
+                // 5. اگر در Node.js هستیم
+                if (typeof require !== 'undefined') {
+                    const { exec } = require('child_process');
+                    exec(`start "" "${path}"`);
+                    return;
+                }
+
+                showToast(`⚠️  برنامه اجرا نشد. لطفاً به صورت دستی باز کنید.`, '⚠️');
             } catch (e) {
-                showToast(`⚠️  خطا در اجرا`, '❌');
+                showToast(`⚠️  خطا در اجرا: ${e.message}`, '❌');
+                console.error('Launch error:', e);
             }
         }
 
@@ -703,10 +860,26 @@
             fileInput.click();
         });
 
-        fileInput.addEventListener('change', (e) => {
+        fileInput.addEventListener('change', async (e) => {
             const files = Array.from(e.target.files);
-            files.forEach(f => addApp(f));
+            for (const file of files) {
+                await addApp(file);
+            }
             fileInput.value = '';
+        });
+
+        // Drag and Drop
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        document.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.exe'));
+            for (const file of files) {
+                await addApp(file);
+            }
         });
 
         // ================================================================
@@ -749,7 +922,7 @@
         }
 
         // ================================================================
-        //  CONTROLLER (Gamepad API) — استاندارد و بدون نمایش راهنما
+        //  CONTROLLER SUPPORT (استاندارد و بدون راهنما)
         // ================================================================
         let gamepadIndex = null;
         let gpDebounce = 0;
@@ -780,7 +953,7 @@
             const axes = gp.axes;
             const buttons = gp.buttons;
 
-            // جهت‌یابی با D-Pad / Left Stick
+            // جهتیابی با D-Pad / Left Stick
             let dx = 0,
                 dy = 0;
             const threshold = 0.4;
@@ -788,7 +961,6 @@
             if (Math.abs(axes[0]) > threshold) dx = axes[0] > 0 ? 1 : -1;
             if (Math.abs(axes[1]) > threshold) dy = axes[1] > 0 ? 1 : -1;
 
-            // D-Pad (buttons 12-15)
             if (buttons[12] && buttons[12].pressed) dy = -1;
             if (buttons[13] && buttons[13].pressed) dy = 1;
             if (buttons[14] && buttons[14].pressed) dx = -1;
@@ -803,7 +975,6 @@
                 if (dx > 0) newIdx = Math.min(total - 1, selectedIndex + 1);
                 if (dx < 0) newIdx = Math.max(0, selectedIndex - 1);
 
-                // اگر تغییر کرد
                 if (newIdx !== selectedIndex) {
                     selectedIndex = newIdx;
                     playSound('focus');
@@ -815,7 +986,7 @@
             const pressed = [];
             buttons.forEach((b, i) => { if (b.pressed) pressed.push(i); });
 
-            // A / X (دکمه 0) → اجرا
+            // A / X (0) → اجرا
             if (pressed.includes(0)) {
                 gpDebounce = now;
                 if (selectedIndex >= 0 && selectedIndex < apps.length) {
@@ -823,7 +994,7 @@
                 }
             }
 
-            // B / O (دکمه 1) → حذف (با نگه‌داشتن)
+            // B / O (1) → حذف
             if (pressed.includes(1)) {
                 gpDebounce = now;
                 if (selectedIndex >= 0 && selectedIndex < apps.length) {
@@ -831,10 +1002,16 @@
                 }
             }
 
-            // Y / △ (دکمه 3) → افزودن برنامه
+            // Y / △ (3) → افزودن
             if (pressed.includes(3)) {
                 gpDebounce = now;
                 fileInput.click();
+            }
+
+            // Start (9) → خروج از برنامه
+            if (pressed.includes(9)) {
+                gpDebounce = now;
+                showToast('⏹️  خروج از برنامه', '⏹️');
             }
         }
 
@@ -879,7 +1056,7 @@
         });
 
         // ================================================================
-        //  BACKGROUND (Liquid Glass particles)
+        //  BACKGROUND
         // ================================================================
         function initBackground() {
             const canvas = document.getElementById('bg-canvas');
@@ -972,10 +1149,8 @@
             setInterval(updateClock, 10000);
             setInterval(updateBattery, 60000);
 
-            // شروع حلقه کنترلر
             gamepadLoop();
 
-            // رویدادهای اتصال/قطع کنترلر
             window.addEventListener('gamepadconnected', () => {
                 showToast('🎮  کنترلر متصل شد', '🎮');
                 scanGamepads();
