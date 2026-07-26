@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LTC Launcher</title>
+    <style>
+        /* ----- RESET & BASE ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --glass-blur: 32px;
+            --primary: #00d4ff;
+            --primary-glow: rgba(0, 212, 255, 0.25);
+            --bg-deep: #0a0a12;
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.3);
+            --radius-card: 24px;
+            --radius-lg: 32px;
+            --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+        }
+
+        /* ----- DYNAMIC BACKGROUND (Liquid Glass) ----- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(0, 212, 255, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 70%, rgba(123, 47, 252, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 90%, rgba(255, 45, 149, 0.04) 0%, transparent 45%);
+        }
+
+        /* ----- APP CONTAINER ----- */
+        #app {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 28px 16px 28px;
+            gap: 14px;
+        }
+
+        /* ----- TOP BAR ----- */
+        #top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 22px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--glass-shadow);
+            flex-shrink: 0;
+            min-height: 56px;
+        }
+
+        .top-left,
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 50%, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand small {
+            font-weight: 400;
+            font-size: 11px;
+            color: var(--text-muted);
+            -webkit-text-fill-color: var(--text-muted);
+            background: none;
+        }
+
+        .top-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: var(--transition);
+        }
+
+        .top-item .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.3);
+            display: inline-block;
+        }
+
+        .status-time {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ----- MAIN ROW (Horizontal) ----- */
+        #main-wrap {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px 0 16px 0;
+            scroll-behavior: smooth;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* مرکز چینش افقی */
+        }
+
+        #main-wrap::-webkit-scrollbar {
+            height: 4px;
+        }
+        #main-wrap::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #main-wrap::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+        }
+
+        #app-row {
+            display: flex;
+            gap: 28px;
+            padding: 0 12px;
+            align-items: center;
+            flex-wrap: nowrap;
+            min-height: 100%;
+            justify-content: center;
+        }
+
+        /* ----- APP CARD (بزرگ و مناسب) ----- */
+        .app-card {
+            flex: 0 0 200px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 2px solid transparent;
+            border-radius: var(--radius-card);
+            padding: 28px 16px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            position: relative;
+            min-height: 220px;
+            will-change: transform;
+        }
+
+        .app-card .icon-wrap {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .app-card .icon-wrap .glass-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 26px;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+
+        .app-card .app-name {
+            font-size: 17px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-primary);
+            line-height: 1.3;
+            max-width: 100%;
+            word-break: break-word;
+        }
+
+        .app-card .app-path {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ----- FOCUS STATE (Android TV style) ----- */
+        .app-card.focused {
+            border-color: var(--primary) !important;
+            transform: scale(1.08) translateY(-6px);
+            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.15), 0 20px 56px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .app-card.focused .icon-wrap {
+            transform: scale(1.06);
+            box-shadow: 0 0 40px var(--primary-glow);
+        }
+
+        .app-card.focused .icon-wrap .glass-ring {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        /* ----- ADD CARD ----- */
+        .add-card {
+            flex: 0 0 200px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            min-height: 220px;
+            color: var(--text-muted);
+        }
+
+        .add-card:hover {
+            border-color: var(--primary);
+            background: rgba(0, 212, 255, 0.04);
+            transform: scale(1.04);
+        }
+
+        .add-card .add-icon {
+            font-size: 56px;
+            font-weight: 300;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .add-card:hover .add-icon {
+            color: var(--primary);
+            transform: rotate(90deg);
+        }
+
+        .add-card .add-label {
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* ----- HIDDEN FILE INPUT ----- */
+        #file-input {
+            display: none;
+        }
+
+        /* ----- TOAST (Liquid Glass) ----- */
+        #toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 14px 32px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            z-index: 200;
+            box-shadow: 0 12px 56px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            white-space: nowrap;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 768px) {
+            #app {
+                padding: 12px 14px 10px 14px;
+                gap: 10px;
+            }
+            .app-card,
+            .add-card {
+                flex: 0 0 160px;
+                min-height: 180px;
+                padding: 20px 12px 16px;
+            }
+            .app-card .icon-wrap {
+                width: 68px;
+                height: 68px;
+                font-size: 32px;
+                border-radius: 18px;
+            }
+            .app-card .app-name {
+                font-size: 14px;
+            }
+            .brand {
+                font-size: 16px;
+            }
+            .brand small {
+                display: none;
+            }
+            .top-item .label {
+                display: none;
+            }
+            #top-bar {
+                padding: 6px 14px;
+                min-height: 44px;
+            }
+            #toast {
+                bottom: 80px;
+                padding: 10px 20px;
+                font-size: 13px;
+                white-space: normal;
+            }
+            #app-row {
+                gap: 18px;
+                padding: 0 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-card,
+            .add-card {
+                flex: 0 0 120px;
+                min-height: 140px;
+                padding: 14px 8px 12px;
+                border-radius: 18px;
+            }
+            .app-card .icon-wrap {
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+                border-radius: 14px;
+            }
+            .app-card .app-name {
+                font-size: 12px;
+            }
+            .app-card .app-path {
+                font-size: 9px;
+            }
+            .add-card .add-icon {
+                font-size: 38px;
+            }
+            .add-card .add-label {
+                font-size: 12px;
+            }
+            .status-time {
+                font-size: 13px;
+            }
+            #app-row {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== BACKGROUND ===== -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="bg-glow"></div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast">
+        <span id="toast-icon">✦</span>
+        <span id="toast-msg">آماده</span>
+    </div>
+
+    <!-- ===== FILE INPUT (hidden) ===== -->
+    <input type="file" id="file-input" accept=".exe" multiple />
+
+    <!-- ===== APP ===== -->
+    <div id="app">
+
+        <!-- TOP BAR -->
+        <div id="top-bar">
+            <div class="top-left">
+                <div class="brand">
+                    <span>✦ LTC</span>
+                    <small>| Launcher</small>
+                </div>
+                <div class="top-item">
+                    <span class="dot"></span>
+                    <span class="label">آنلاین</span>
+                </div>
+            </div>
+            <div class="top-right">
+                <div class="top-item" id="battery-container" style="display:none;">
+                    <span>🔋</span>
+                    <span id="battery-level">--%</span>
+                </div>
+                <div class="top-item">
+                    <span>⌚</span>
+                    <span class="status-time" id="status-time">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN ROW (Horizontal) -->
+        <div id="main-wrap">
+            <div id="app-row">
+                <!-- کارت افزودن + -->
+                <div class="add-card" id="add-btn">
+                    <div class="add-icon">+</div>
+                    <div class="add-label">افزودن برنامه</div>
+                </div>
+                <!-- کارت‌های برنامه‌ها به صورت پویا اضافه می‌شوند -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ================================================================
+        //  STATE
+        // ================================================================
+        let apps = [];
+        let selectedIndex = -1;
+        let toastTimer = null;
+        let audioCtx = null;
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
+        const rowEl = document.getElementById('app-row');
+        const addBtn = document.getElementById('add-btn');
+        const fileInput = document.getElementById('file-input');
+        const statusTime = document.getElementById('status-time');
+        const batteryContainer = document.getElementById('battery-container');
+        const batteryLevel = document.getElementById('battery-level');
+        const toastEl = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+        const toastIcon = document.getElementById('toast-icon');
+
+        // ================================================================
+        //  AUDIO FX (Web Audio)
+        // ================================================================
+        function initAudio() {
+            try {
+                audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+            } catch (_) {}
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'focus') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.06);
+                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'launch') {
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.14);
+                } else if (type === 'add') {
+                    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.22);
+                } else if (type === 'remove') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.14);
+                }
+            } catch (_) {}
+        }
+
+        // ================================================================
+        //  LOAD / SAVE (localStorage)
+        // ================================================================
+        function loadApps() {
+            try {
+                const data = localStorage.getItem('ltc_apps');
+                if (data) {
+                    apps = JSON.parse(data);
+                    apps = apps.map(a => ({
+                        ...a,
+                        icon: a.icon || '📄'
+                    }));
+                } else {
+                    apps = [];
+                }
+            } catch (_) {
+                apps = [];
+            }
+            renderRow();
+        }
+
+        function saveApps() {
+            try {
+                localStorage.setItem('ltc_apps', JSON.stringify(apps));
+            } catch (_) {}
+        }
+
+        // ================================================================
+        //  RENDER
+        // ================================================================
+        function renderRow() {
+            const cards = rowEl.querySelectorAll('.app-card');
+            cards.forEach(c => c.remove());
+
+            apps.forEach((app, idx) => {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.dataset.index = idx;
+                card.dataset.path = app.path;
+
+                const iconEmoji = app.icon || '📄';
+                card.innerHTML = `
+              <div class="icon-wrap" style="background:#2c3e50;">
+                <span>${iconEmoji}</span>
+                <div class="glass-ring"></div>
+              </div>
+              <div class="app-name">${app.name}</div>
+              <div class="app-path">${app.path}</div>
+            `;
+
+                card.addEventListener('click', () => launchApp(app));
+                card.addEventListener('mouseenter', () => {
+                    if (selectedIndex !== idx) {
+                        selectedIndex = idx;
+                        playSound('focus');
+                        updateFocus();
+                    }
+                });
+
+                // حذف با کلیک راست
+                card.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    removeApp(idx);
+                });
+
+                rowEl.insertBefore(card, addBtn);
+            });
+
+            if (selectedIndex >= apps.length) selectedIndex = apps.length - 1;
+            updateFocus();
+        }
+
+        function updateFocus() {
+            const cards = rowEl.querySelectorAll('.app-card');
+            cards.forEach(c => c.classList.remove('focused'));
+
+            if (selectedIndex >= 0 && selectedIndex < cards.length) {
+                cards[selectedIndex].classList.add('focused');
+                cards[selectedIndex].scrollIntoView({
+                    block: 'nearest',
+                    behavior: 'smooth',
+                    inline: 'center'
+                });
+            }
+        }
+
+        // ================================================================
+        //  ADD APP
+        // ================================================================
+        function addApp(file) {
+            if (!file) return;
+            const name = file.name.replace(/\.exe$/i, '');
+            const path = file.path || file.webkitRelativePath || file.name;
+
+            const newApp = {
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                name: name,
+                path: path,
+                icon: '📄'
+            };
+
+            apps.push(newApp);
+            saveApps();
+            renderRow();
+            playSound('add');
+            showToast(`✅  ${name}  اضافه شد`, '➕');
+            selectedIndex = apps.length - 1;
+            updateFocus();
+        }
+
+        function removeApp(index) {
+            if (index < 0 || index >= apps.length) return;
+            const name = apps[index].name;
+            apps.splice(index, 1);
+            saveApps();
+            renderRow();
+            playSound('remove');
+            showToast(`🗑️  ${name}  حذف شد`, '➖');
+            if (selectedIndex >= apps.length) selectedIndex = apps.length - 1;
+            updateFocus();
+        }
+
+        // ================================================================
+        //  LAUNCH APP
+        // ================================================================
+        function launchApp(app) {
+            playSound('launch');
+            showToast(`🚀  ${app.name}  در حال اجرا`, '⚡');
+            try {
+                const win = window.open(`file:///${app.path.replace(/\\/g, '/')}`, '_blank');
+                if (!win || win.closed) {
+                    window.location.href = `file:///${app.path.replace(/\\/g, '/')}`;
+                }
+            } catch (e) {
+                showToast(`⚠️  خطا در اجرا`, '❌');
+            }
+        }
+
+        // ================================================================
+        //  FILE SELECTION
+        // ================================================================
+        addBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(f => addApp(f));
+            fileInput.value = '';
+        });
+
+        // ================================================================
+        //  BATTERY (real)
+        // ================================================================
+        async function updateBattery() {
+            try {
+                if ('getBattery' in navigator) {
+                    const battery = await navigator.getBattery();
+                    const level = Math.round(battery.level * 100);
+                    batteryLevel.textContent = level + '%';
+                    batteryContainer.style.display = 'flex';
+                } else {
+                    batteryContainer.style.display = 'none';
+                }
+            } catch (_) {
+                batteryContainer.style.display = 'none';
+            }
+        }
+
+        // ================================================================
+        //  CLOCK
+        // ================================================================
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            statusTime.textContent = `${h}:${m}`;
+        }
+
+        // ================================================================
+        //  TOAST
+        // ================================================================
+        function showToast(msg, icon = '✦') {
+            toastMsg.textContent = msg;
+            toastIcon.textContent = icon;
+            toastEl.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
+        }
+
+        // ================================================================
+        //  CONTROLLER (Gamepad API) — استاندارد و بدون نمایش راهنما
+        // ================================================================
+        let gamepadIndex = null;
+        let gpDebounce = 0;
+
+        function scanGamepads() {
+            const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+            let found = false;
+            for (let i = 0; i < pads.length; i++) {
+                if (pads[i] && pads[i].connected) {
+                    found = true;
+                    gamepadIndex = i;
+                    break;
+                }
+            }
+            if (!found) {
+                gamepadIndex = null;
+            }
+        }
+
+        function processGamepad() {
+            if (gamepadIndex === null) return;
+            const gp = navigator.getGamepads()[gamepadIndex];
+            if (!gp) return;
+
+            const now = Date.now();
+            if (now - gpDebounce < 80) return;
+
+            const axes = gp.axes;
+            const buttons = gp.buttons;
+
+            // جهت‌یابی با D-Pad / Left Stick
+            let dx = 0,
+                dy = 0;
+            const threshold = 0.4;
+
+            if (Math.abs(axes[0]) > threshold) dx = axes[0] > 0 ? 1 : -1;
+            if (Math.abs(axes[1]) > threshold) dy = axes[1] > 0 ? 1 : -1;
+
+            // D-Pad (buttons 12-15)
+            if (buttons[12] && buttons[12].pressed) dy = -1;
+            if (buttons[13] && buttons[13].pressed) dy = 1;
+            if (buttons[14] && buttons[14].pressed) dx = -1;
+            if (buttons[15] && buttons[15].pressed) dx = 1;
+
+            if (dx !== 0 || dy !== 0) {
+                gpDebounce = now;
+                const total = apps.length;
+                if (total === 0) return;
+
+                let newIdx = selectedIndex;
+                if (dx > 0) newIdx = Math.min(total - 1, selectedIndex + 1);
+                if (dx < 0) newIdx = Math.max(0, selectedIndex - 1);
+
+                // اگر تغییر کرد
+                if (newIdx !== selectedIndex) {
+                    selectedIndex = newIdx;
+                    playSound('focus');
+                    updateFocus();
+                }
+            }
+
+            // دکمه‌ها
+            const pressed = [];
+            buttons.forEach((b, i) => { if (b.pressed) pressed.push(i); });
+
+            // A / X (دکمه 0) → اجرا
+            if (pressed.includes(0)) {
+                gpDebounce = now;
+                if (selectedIndex >= 0 && selectedIndex < apps.length) {
+                    launchApp(apps[selectedIndex]);
+                }
+            }
+
+            // B / O (دکمه 1) → حذف (با نگه‌داشتن)
+            if (pressed.includes(1)) {
+                gpDebounce = now;
+                if (selectedIndex >= 0 && selectedIndex < apps.length) {
+                    removeApp(selectedIndex);
+                }
+            }
+
+            // Y / △ (دکمه 3) → افزودن برنامه
+            if (pressed.includes(3)) {
+                gpDebounce = now;
+                fileInput.click();
+            }
+        }
+
+        // ================================================================
+        //  KEYBOARD
+        // ================================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const total = apps.length;
+                if (total === 0) return;
+                let newIdx = selectedIndex;
+                if (e.key === 'ArrowRight') newIdx = Math.min(total - 1, selectedIndex + 1);
+                else newIdx = Math.max(0, selectedIndex - 1);
+                if (newIdx !== selectedIndex) {
+                    selectedIndex = newIdx;
+                    playSound('focus');
+                    updateFocus();
+                }
+                return;
+            }
+
+            if (e.key === 'Enter') {
+                if (selectedIndex >= 0 && selectedIndex < apps.length) {
+                    launchApp(apps[selectedIndex]);
+                }
+                return;
+            }
+
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (selectedIndex >= 0 && selectedIndex < apps.length) {
+                    removeApp(selectedIndex);
+                }
+                return;
+            }
+
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                fileInput.click();
+                return;
+            }
+        });
+
+        // ================================================================
+        //  BACKGROUND (Liquid Glass particles)
+        // ================================================================
+        function initBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            const particles = [];
+            const COUNT = 75;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * w;
+                    this.y = Math.random() * h;
+                    this.vx = (Math.random() - 0.5) * 0.25;
+                    this.vy = (Math.random() - 0.5) * 0.25;
+                    this.r = Math.random() * 2.5 + 0.5;
+                    this.alpha = Math.random() * 0.15 + 0.03;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > w) this.vx *= -1;
+                    if (this.y < 0 || this.y > h) this.vy *= -1;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < COUNT; i++) particles.push(new Particle());
+
+            function drawConnections() {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 150) {
+                            const alpha = (1 - dist / 150) * 0.06;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(0,212,255,${alpha})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                particles.forEach(p => { p.update();
+                    p.draw(); });
+                drawConnections();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ================================================================
+        //  GAMEPAD LOOP
+        // ================================================================
+        function gamepadLoop() {
+            scanGamepads();
+            processGamepad();
+            requestAnimationFrame(gamepadLoop);
+        }
+
+        // ================================================================
+        //  INIT
+        // ================================================================
+        async function init() {
+            loadApps();
+            updateClock();
+            await updateBattery();
+            initBackground();
+            initAudio();
+
+            setInterval(updateClock, 10000);
+            setInterval(updateBattery, 60000);
+
+            // شروع حلقه کنترلر
+            gamepadLoop();
+
+            // رویدادهای اتصال/قطع کنترلر
+            window.addEventListener('gamepadconnected', () => {
+                showToast('🎮  کنترلر متصل شد', '🎮');
+                scanGamepads();
+            });
+            window.addEventListener('gamepaddisconnected', () => {
+                showToast('🔌  کنترلر قطع شد', '🔌');
+                gamepadIndex = null;
+            });
+
+            setTimeout(() => showToast('✦  LTC Launcher  ✦', '✨'), 500);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>
