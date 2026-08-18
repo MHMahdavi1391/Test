@@ -1,1170 +1,680 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LTC Launcher</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0c10">
+<title>LumenOS</title>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: rgba(255,255,255,0.08);
+    --surface-2: rgba(255,255,255,0.12);
+    --border: rgba(255,255,255,0.1);
+    --text: #f5f7fa;
+    --text-2: rgba(245,247,250,0.7);
+    --text-3: rgba(245,247,250,0.45);
+    --accent: #f5c842;
+    --accent-2: #5b8cff;
+    --green: #34d399;
+    --red: #f87171;
+    --radius: 22px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+    background: #000;
+    color: var(--text);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+  .phone {
+    width: 100%;
+    height: 100%;
+    max-width: 430px;
+    max-height: 100dvh;
+    position: relative;
+    overflow: hidden;
+    background: #0a0c10;
+  }
+  @media (min-width: 480px) {
+    body { background: #111; }
+    .phone {
+      height: min(860px, 96vh);
+      border-radius: 36px;
+      box-shadow: 0 0 0 10px #1a1a1a, 0 25px 80px rgba(0,0,0,0.6);
+    }
+  }
 
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            --glass-blur: 32px;
-            --primary: #00d4ff;
-            --primary-glow: rgba(0, 212, 255, 0.25);
-            --bg-deep: #0a0a12;
-            --text-primary: rgba(255, 255, 255, 0.92);
-            --text-secondary: rgba(255, 255, 255, 0.6);
-            --text-muted: rgba(255, 255, 255, 0.3);
-            --radius-card: 24px;
-            --radius-lg: 32px;
-            --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
+  .wallpaper {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(91,140,255,0.35), transparent 55%),
+      radial-gradient(ellipse 70% 45% at 90% 20%, rgba(245,200,66,0.22), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(52,211,153,0.12), transparent 50%),
+      linear-gradient(160deg, #0b1020 0%, #0a0c10 45%, #121018 100%);
+    z-index: 0;
+  }
 
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: var(--font);
-            background: var(--bg-deep);
-            color: var(--text-primary);
-        }
+  .status-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: calc(10px + var(--safe-top)) 18px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .status-left, .status-right { display: flex; align-items: center; gap: 8px; }
+  .status-icons { display: flex; align-items: center; gap: 6px; opacity: 0.9; }
+  .battery { display: flex; align-items: center; gap: 4px; }
+  .battery-body {
+    width: 22px; height: 11px; border: 1.5px solid rgba(255,255,255,0.7);
+    border-radius: 3px; padding: 1px; position: relative;
+  }
+  .battery-body::after {
+    content: ''; position: absolute; right: -3px; top: 2px;
+    width: 2px; height: 5px; background: rgba(255,255,255,0.7); border-radius: 0 1px 1px 0;
+  }
+  .battery-level { height: 100%; width: 78%; background: var(--green); border-radius: 1px; }
 
-        /* ----- DYNAMIC BACKGROUND ----- */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
+  .screen {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
 
-        .bg-glow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-            background:
-                radial-gradient(ellipse at 20% 30%, rgba(0, 212, 255, 0.06) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 70%, rgba(123, 47, 252, 0.05) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 90%, rgba(255, 45, 149, 0.04) 0%, transparent 45%);
-        }
+  #lock {
+    justify-content: space-between;
+    padding: calc(70px + var(--safe-top)) 24px calc(40px + var(--safe-bottom));
+    z-index: 40;
+  }
+  .lock-time { text-align: center; }
+  .lock-clock {
+    font-size: 4.2rem;
+    font-weight: 200;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .lock-date {
+    margin-top: 8px;
+    font-size: 1.05rem;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .lock-hint {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 0.85rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+  .lock-swipe {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 4px;
+    margin: 0 auto 14px;
+  }
 
-        /* ----- APP CONTAINER ----- */
-        #app {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            padding: 18px 28px 16px 28px;
-            gap: 14px;
-        }
+  #home {
+    padding-top: calc(48px + var(--safe-top));
+    padding-bottom: calc(88px + var(--safe-bottom));
+  }
+  .home-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 18px 16px;
+    scrollbar-width: none;
+  }
+  .home-scroll::-webkit-scrollbar { display: none; }
 
-        /* ----- TOP BAR ----- */
-        #top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 22px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--glass-shadow);
-            flex-shrink: 0;
-            min-height: 56px;
-        }
+  .search-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 11px 16px;
+    margin-bottom: 18px;
+    color: var(--text-3);
+    font-size: 0.9rem;
+  }
 
-        .top-left,
-        .top-right {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
+  .widget {
+    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 18px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .widget-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .widget-time .big {
+    font-size: 2.4rem;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+  }
+  .widget-time .sub {
+    color: var(--text-2);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .widget-weather {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .widget-weather .temp { font-size: 1.8rem; font-weight: 600; }
+  .widget-weather .city { color: var(--text-2); font-size: 0.82rem; }
+  .widget-music {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .widget-music .cover {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #e89a20);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .widget-music .meta { flex: 1; min-width: 0; }
+  .widget-music .title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .widget-music .artist { color: var(--text-3); font-size: 0.78rem; }
+  .widget-music .play {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
 
-        .brand {
-            font-weight: 700;
-            font-size: 18px;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #fff 50%, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  .apps-label {
+    font-size: 0.78rem;
+    color: var(--text-3);
+    margin: 6px 4px 10px;
+    font-weight: 600;
+  }
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px 10px;
+    margin-bottom: 20px;
+  }
+  .app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--text);
+  }
+  .app-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: transform 0.15s ease;
+  }
+  .app:active .app-icon { transform: scale(0.9); }
+  .app-name {
+    font-size: 0.7rem;
+    color: var(--text-2);
+    text-align: center;
+    max-width: 70px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-        .brand small {
-            font-weight: 400;
-            font-size: 11px;
-            color: var(--text-muted);
-            -webkit-text-fill-color: var(--text-muted);
-            background: none;
-        }
+  .dock {
+    position: absolute;
+    bottom: calc(14px + var(--safe-bottom));
+    left: 16px; right: 16px;
+    z-index: 30;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 10px;
+    background: rgba(20, 24, 32, 0.72);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+  }
+  .dock .app-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    font-size: 1.35rem;
+  }
+  .dock .app-name { display: none; }
 
-        .top-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: var(--transition);
-        }
+  #app-window {
+    z-index: 35;
+    background: #0e1218;
+  }
+  .app-header {
+    padding: calc(14px + var(--safe-top)) 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(14,18,24,0.95);
+  }
+  .app-back {
+    border: none;
+    background: var(--surface);
+    color: var(--text);
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .app-header h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .app-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px calc(24px + var(--safe-bottom));
+  }
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .app-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .app-card p {
+    color: var(--text-2);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(245,200,66,0.12);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(245,200,66,0.25);
+  }
 
-        .top-item .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #4ade80;
-            box-shadow: 0 0 12px rgba(74, 222, 128, 0.3);
-            display: inline-block;
-        }
+  #control {
+    z-index: 45;
+    background: rgba(8,10,14,0.55);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    padding: calc(56px + var(--safe-top)) 18px 24px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #control.open { display: flex; }
+  .cc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .cc-tile {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    min-height: 90px;
+  }
+  .cc-tile.on {
+    background: rgba(91,140,255,0.35);
+    border-color: rgba(91,140,255,0.5);
+  }
+  .cc-tile .label {
+    font-size: 0.8rem;
+    margin-top: 10px;
+    font-weight: 600;
+  }
+  .cc-tile .icon { font-size: 1.3rem; }
+  .cc-slider {
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .cc-slider label {
+    font-size: 0.8rem;
+    color: var(--text-2);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .cc-slider input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  .cc-close {
+    margin-top: auto;
+    align-self: center;
+    border: none;
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 10px 24px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
 
-        .status-time {
-            font-weight: 600;
-            font-size: 15px;
-            letter-spacing: 0.3px;
-        }
+  .home-indicator {
+    position: absolute;
+    bottom: calc(6px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 4px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 4px;
+    z-index: 60;
+  }
 
-        /* ----- MAIN ROW ----- */
-        #main-wrap {
-            flex: 1;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 10px 0 16px 0;
-            scroll-behavior: smooth;
-            min-height: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+  .pull-zone {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: calc(28px + var(--safe-top));
+    z-index: 55;
+  }
 
-        #main-wrap::-webkit-scrollbar {
-            height: 4px;
-        }
-        #main-wrap::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        #main-wrap::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
-        }
-
-        #app-row {
-            display: flex;
-            gap: 28px;
-            padding: 0 12px;
-            align-items: center;
-            flex-wrap: nowrap;
-            min-height: 100%;
-            justify-content: center;
-        }
-
-        /* ----- APP CARD ----- */
-        .app-card {
-            flex: 0 0 200px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 2px solid transparent;
-            border-radius: var(--radius-card);
-            padding: 28px 16px 22px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-            position: relative;
-            min-height: 220px;
-            will-change: transform;
-        }
-
-        .app-card .icon-wrap {
-            width: 88px;
-            height: 88px;
-            border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            flex-shrink: 0;
-            position: relative;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-            transition: var(--transition);
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            overflow: hidden;
-        }
-
-        .app-card .icon-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 22px;
-        }
-
-        .app-card .icon-wrap .glass-ring {
-            position: absolute;
-            inset: -4px;
-            border-radius: 26px;
-            border: 2px solid transparent;
-            transition: var(--transition);
-            pointer-events: none;
-        }
-
-        .app-card .app-name {
-            font-size: 17px;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-primary);
-            line-height: 1.3;
-            max-width: 100%;
-            word-break: break-word;
-        }
-
-        .app-card .app-path {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-align: center;
-            width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* ----- FOCUS STATE ----- */
-        .app-card.focused {
-            border-color: var(--primary) !important;
-            transform: scale(1.08) translateY(-6px);
-            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.15), 0 20px 56px rgba(0, 0, 0, 0.5);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .app-card.focused .icon-wrap {
-            transform: scale(1.06);
-            box-shadow: 0 0 40px var(--primary-glow);
-        }
-
-        .app-card.focused .icon-wrap .glass-ring {
-            border-color: rgba(0, 212, 255, 0.3);
-        }
-
-        /* ----- ADD CARD ----- */
-        .add-card {
-            flex: 0 0 200px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 2px dashed rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius-card);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-            min-height: 220px;
-            color: var(--text-muted);
-        }
-
-        .add-card:hover {
-            border-color: var(--primary);
-            background: rgba(0, 212, 255, 0.04);
-            transform: scale(1.04);
-        }
-
-        .add-card .add-icon {
-            font-size: 56px;
-            font-weight: 300;
-            color: var(--text-muted);
-            transition: var(--transition);
-        }
-
-        .add-card:hover .add-icon {
-            color: var(--primary);
-            transform: rotate(90deg);
-        }
-
-        .add-card .add-label {
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        /* ----- TOAST ----- */
-        #toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 14px 32px;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-primary);
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-            pointer-events: none;
-            z-index: 200;
-            box-shadow: 0 12px 56px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            white-space: nowrap;
-        }
-
-        #toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* ----- RESPONSIVE ----- */
-        @media (max-width: 768px) {
-            #app {
-                padding: 12px 14px 10px 14px;
-                gap: 10px;
-            }
-            .app-card,
-            .add-card {
-                flex: 0 0 160px;
-                min-height: 180px;
-                padding: 20px 12px 16px;
-            }
-            .app-card .icon-wrap {
-                width: 68px;
-                height: 68px;
-                font-size: 32px;
-                border-radius: 18px;
-            }
-            .app-card .app-name {
-                font-size: 14px;
-            }
-            .brand {
-                font-size: 16px;
-            }
-            .brand small {
-                display: none;
-            }
-            .top-item .label {
-                display: none;
-            }
-            #top-bar {
-                padding: 6px 14px;
-                min-height: 44px;
-            }
-            #toast {
-                bottom: 80px;
-                padding: 10px 20px;
-                font-size: 13px;
-                white-space: normal;
-            }
-            #app-row {
-                gap: 18px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .app-card,
-            .add-card {
-                flex: 0 0 120px;
-                min-height: 140px;
-                padding: 14px 8px 12px;
-                border-radius: 18px;
-            }
-            .app-card .icon-wrap {
-                width: 52px;
-                height: 52px;
-                font-size: 24px;
-                border-radius: 14px;
-            }
-            .app-card .app-name {
-                font-size: 12px;
-            }
-            .app-card .app-path {
-                font-size: 9px;
-            }
-            .add-card .add-icon {
-                font-size: 38px;
-            }
-            .add-card .add-label {
-                font-size: 12px;
-            }
-            .status-time {
-                font-size: 13px;
-            }
-            #app-row {
-                gap: 12px;
-            }
-        }
-
-        /* ----- HIDDEN FILE INPUT ----- */
-        #file-input {
-            display: none;
-        }
-    </style>
+  .brand {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-3);
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+  }
+</style>
 </head>
 <body>
+<div class="phone" id="phone">
+  <div class="wallpaper"></div>
 
-    <!-- ===== BACKGROUND ===== -->
-    <canvas id="bg-canvas"></canvas>
-    <div class="bg-glow"></div>
+  <div class="status-bar" id="statusBar">
+    <div class="status-left"><span id="statusTime">12:00</span></div>
+    <div class="status-right">
+      <div class="status-icons">
+        <span>▮▮▮</span>
+        <span>Wi‑Fi</span>
+      </div>
+      <div class="battery">
+        <span id="batText">78%</span>
+        <div class="battery-body"><div class="battery-level"></div></div>
+      </div>
+    </div>
+  </div>
 
-    <!-- ===== TOAST ===== -->
-    <div id="toast">
-        <span id="toast-icon">✦</span>
-        <span id="toast-msg">آماده</span>
+  <div class="pull-zone" id="pullZone"></div>
+
+  <section class="screen active" id="lock">
+    <div class="lock-time">
+      <div class="lock-clock" id="lockClock">12:00</div>
+      <div class="lock-date" id="lockDate">دوشنبه ۱۸ مرداد</div>
+    </div>
+    <div>
+      <div class="lock-swipe"></div>
+      <div class="lock-hint">برای باز کردن به بالا بکشید</div>
+      <div class="brand">LUMENOS · LTC</div>
+    </div>
+  </section>
+
+  <section class="screen" id="home">
+    <div class="home-scroll">
+      <div class="search-pill">🔍 جستجو در LumenOS</div>
+
+      <div class="widget-row">
+        <div class="widget widget-time">
+          <div class="big" id="homeClock">12:00</div>
+          <div class="sub" id="homeDate">دوشنبه · ۱۸ مرداد</div>
+        </div>
+        <div class="widget widget-weather">
+          <div class="temp">۲۸°</div>
+          <div class="city">تهران · آفتابی</div>
+        </div>
+      </div>
+
+      <div class="widget widget-music">
+        <div class="cover">♪</div>
+        <div class="meta">
+          <div class="title">YELO Player</div>
+          <div class="artist">پخش موسیقی LTC</div>
+        </div>
+        <button class="play" type="button" id="musicBtn">▶</button>
+      </div>
+
+      <div class="apps-label">برنامه‌ها</div>
+      <div class="apps-grid" id="appsGrid"></div>
     </div>
 
-    <!-- ===== FILE INPUT ===== -->
-    <input type="file" id="file-input" accept=".exe" multiple />
+    <nav class="dock" id="dock"></nav>
+  </section>
 
-    <!-- ===== APP ===== -->
-    <div id="app">
-
-        <!-- TOP BAR -->
-        <div id="top-bar">
-            <div class="top-left">
-                <div class="brand">
-                    <span>✦ LTC</span>
-                    <small>| Launcher</small>
-                </div>
-                <div class="top-item">
-                    <span class="dot"></span>
-                    <span class="label">آنلاین</span>
-                </div>
-            </div>
-            <div class="top-right">
-                <div class="top-item" id="battery-container" style="display:none;">
-                    <span>🔋</span>
-                    <span id="battery-level">--%</span>
-                </div>
-                <div class="top-item">
-                    <span>⌚</span>
-                    <span class="status-time" id="status-time">00:00</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- MAIN ROW -->
-        <div id="main-wrap">
-            <div id="app-row">
-                <div class="add-card" id="add-btn">
-                    <div class="add-icon">+</div>
-                    <div class="add-label">افزودن برنامه</div>
-                </div>
-            </div>
-        </div>
-
+  <section class="screen" id="app-window">
+    <div class="app-header">
+      <button class="app-back" id="appBack" type="button">←</button>
+      <h2 id="appTitle">برنامه</h2>
     </div>
-
-    <script>
-        // ================================================================
-        //  STATE
-        // ================================================================
-        let apps = [];
-        let selectedIndex = -1;
-        let toastTimer = null;
-        let audioCtx = null;
-
-        // ================================================================
-        //  DOM REFS
-        // ================================================================
-        const rowEl = document.getElementById('app-row');
-        const addBtn = document.getElementById('add-btn');
-        const fileInput = document.getElementById('file-input');
-        const statusTime = document.getElementById('status-time');
-        const batteryContainer = document.getElementById('battery-container');
-        const batteryLevel = document.getElementById('battery-level');
-        const toastEl = document.getElementById('toast');
-        const toastMsg = document.getElementById('toast-msg');
-        const toastIcon = document.getElementById('toast-icon');
-
-        // ================================================================
-        //  AUDIO FX
-        // ================================================================
-        function initAudio() {
-            try {
-                audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-            } catch (_) {}
-        }
-
-        function playSound(type) {
-            if (!audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'focus') {
-                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.06);
-                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.08);
-                } else if (type === 'launch') {
-                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.12);
-                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.14);
-                } else if (type === 'add') {
-                    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.1);
-                    osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.22);
-                } else if (type === 'remove') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.12);
-                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.14);
-                }
-            } catch (_) {}
-        }
-
-        // ================================================================
-        //  EXTRACT ICON FROM EXE (با استفاده از FileReader)
-        // ================================================================
-        function extractIconFromExe(file) {
-            return new Promise((resolve) => {
-                try {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            // سعی در استخراج آیکون از فایل
-                            const buffer = e.target.result;
-                            const view = new DataView(buffer);
-
-                            // بررسی امضای PE
-                            const peOffset = view.getUint32(0x3C, true);
-                            const signature = view.getUint32(peOffset, true);
-
-                            if (signature === 0x00004550) { // "PE\0\0"
-                                // سعی در پیدا کردن منابع آیکون
-                                const resourceOffset = peOffset + 0x88;
-                                const resourceRVA = view.getUint32(resourceOffset, true);
-                                const resourceSize = view.getUint32(resourceOffset + 4, true);
-
-                                if (resourceRVA > 0 && resourceSize > 0) {
-                                    // آیکون پیدا شد، اما استخراج واقعی نیاز به پردازش بیشتر دارد
-                                    // در مرورگر نمی‌توانیم به راحتی آیکون را استخراج کنیم
-                                    resolve(null);
-                                    return;
-                                }
-                            }
-                            resolve(null);
-                        } catch (err) {
-                            resolve(null);
-                        }
-                    };
-                    reader.onerror = function() {
-                        resolve(null);
-                    };
-                    reader.readAsArrayBuffer(file);
-                } catch (err) {
-                    resolve(null);
-                }
-            });
-        }
-
-        // ================================================================
-        //  LOAD / SAVE
-        // ================================================================
-        function loadApps() {
-            try {
-                const data = localStorage.getItem('ltc_apps');
-                if (data) {
-                    apps = JSON.parse(data);
-                    apps = apps.map(a => ({
-                        ...a,
-                        icon: a.icon || '📄',
-                        iconData: a.iconData || null
-                    }));
-                } else {
-                    apps = [];
-                }
-            } catch (_) {
-                apps = [];
-            }
-            renderRow();
-        }
-
-        function saveApps() {
-            try {
-                localStorage.setItem('ltc_apps', JSON.stringify(apps));
-            } catch (_) {}
-        }
-
-        // ================================================================
-        //  RENDER
-        // ================================================================
-        function renderRow() {
-            const cards = rowEl.querySelectorAll('.app-card');
-            cards.forEach(c => c.remove());
-
-            apps.forEach((app, idx) => {
-                const card = document.createElement('div');
-                card.className = 'app-card';
-                card.dataset.index = idx;
-
-                let iconHtml = '';
-                if (app.iconData) {
-                    iconHtml = `<img src="${app.iconData}" alt="${app.name}" />`;
-                } else if (app.icon && app.icon.startsWith('data:image')) {
-                    iconHtml = `<img src="${app.icon}" alt="${app.name}" />`;
-                } else {
-                    iconHtml = `<span>${app.icon || '📄'}</span>`;
-                }
-
-                card.innerHTML = `
-              <div class="icon-wrap" style="background:#2c3e50;">
-                ${iconHtml}
-                <div class="glass-ring"></div>
-              </div>
-              <div class="app-name">${app.name}</div>
-              <div class="app-path">${app.path}</div>
-            `;
-
-                card.addEventListener('click', () => launchApp(app));
-                card.addEventListener('mouseenter', () => {
-                    if (selectedIndex !== idx) {
-                        selectedIndex = idx;
-                        playSound('focus');
-                        updateFocus();
-                    }
-                });
-
-                card.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    removeApp(idx);
-                });
-
-                rowEl.insertBefore(card, addBtn);
-            });
-
-            if (selectedIndex >= apps.length) selectedIndex = apps.length - 1;
-            updateFocus();
-        }
-
-        function updateFocus() {
-            const cards = rowEl.querySelectorAll('.app-card');
-            cards.forEach(c => c.classList.remove('focused'));
-
-            if (selectedIndex >= 0 && selectedIndex < cards.length) {
-                cards[selectedIndex].classList.add('focused');
-                cards[selectedIndex].scrollIntoView({
-                    block: 'nearest',
-                    behavior: 'smooth',
-                    inline: 'center'
-                });
-            }
-        }
-
-        // ================================================================
-        //  ADD APP
-        // ================================================================
-        async function addApp(file) {
-            if (!file) return;
-            const name = file.name.replace(/\.exe$/i, '');
-            const path = file.path || file.webkitRelativePath || file.name;
-
-            // استخراج آیکون
-            let icon = '📄';
-            let iconData = null;
-
-            try {
-                // تلاش برای استخراج آیکون از فایل
-                const extractedIcon = await extractIconFromExe(file);
-                if (extractedIcon) {
-                    iconData = extractedIcon;
-                    icon = '';
-                }
-            } catch (_) {}
-
-            // اگر آیکون استخراج نشد، از نام برنامه استفاده می‌کنیم
-            if (!iconData) {
-                const iconMap = {
-                    'chrome': '🌐',
-                    'firefox': '🦊',
-                    'edge': '🌊',
-                    'notepad': '📝',
-                    'explorer': '📂',
-                    'cmd': '💻',
-                    'powershell': '⚡',
-                    'settings': '⚙️',
-                    'code': '📄',
-                    'visual studio': '🔧',
-                    'steam': '🎮',
-                    'spotify': '🎵',
-                    'discord': '💬',
-                    'telegram': '✈️',
-                    'whatsapp': '💚',
-                    'photoshop': '🎨',
-                    'illustrator': '✏️',
-                    'premiere': '🎬',
-                    'after effects': '🎞️',
-                    'word': '📄',
-                    'excel': '📊',
-                    'powerpoint': '📽️',
-                    'outlook': '✉️',
-                    'calculator': '🧮',
-                    'paint': '🎨',
-                    'notepad++': '📝',
-                    'vlc': '📺',
-                    'mpc': '🎬',
-                    'winrar': '📦',
-                    '7zip': '🗜️',
-                    'utorrent': '⬇️',
-                    'qbit': '⬇️',
-                    'telegram': '✈️',
-                    'whatsapp': '💚',
-                    'skype': '💬',
-                    'zoom': '📹',
-                    'teamviewer': '🖥️',
-                    'anydesk': '🖥️'
-                };
-
-                const lowerName = name.toLowerCase();
-                let found = false;
-                for (const [key, value] of Object.entries(iconMap)) {
-                    if (lowerName.includes(key)) {
-                        icon = value;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    icon = '📄';
-                }
-            }
-
-            const newApp = {
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
-                name: name,
-                path: path,
-                icon: icon,
-                iconData: iconData
-            };
-
-            apps.push(newApp);
-            saveApps();
-            renderRow();
-            playSound('add');
-            showToast(`✅  ${name}  اضافه شد`, '➕');
-            selectedIndex = apps.length - 1;
-            updateFocus();
-        }
-
-        function removeApp(index) {
-            if (index < 0 || index >= apps.length) return;
-            const name = apps[index].name;
-            apps.splice(index, 1);
-            saveApps();
-            renderRow();
-            playSound('remove');
-            showToast(`🗑️  ${name}  حذف شد`, '➖');
-            if (selectedIndex >= apps.length) selectedIndex = apps.length - 1;
-            updateFocus();
-        }
-
-        // ================================================================
-        //  LAUNCH APP (اجرای واقعی)
-        // ================================================================
-        function launchApp(app) {
-            playSound('launch');
-            showToast(`🚀  ${app.name}  در حال اجرا...`, '⚡');
-
-            try {
-                // روش‌های مختلف برای اجرای برنامه
-                const path = app.path;
-
-                // 1. استفاده از shell: در ویندوز
-                if (window.navigator && window.navigator.msLaunchUri) {
-                    window.navigator.msLaunchUri(`file:///${path.replace(/\\/g, '/')}`);
-                    return;
-                }
-
-                // 2. استفاده از window.open
-                const win = window.open(`file:///${path.replace(/\\/g, '/')}`, '_blank');
-                if (win && !win.closed) {
-                    return;
-                }
-
-                // 3. استفاده از location.href
-                window.location.href = `file:///${path.replace(/\\/g, '/')}`;
-
-                // 4. اگر در محیط Electron هستیم
-                if (window.require) {
-                    const { shell } = window.require('electron');
-                    shell.openPath(path);
-                    return;
-                }
-
-                // 5. اگر در Node.js هستیم
-                if (typeof require !== 'undefined') {
-                    const { exec } = require('child_process');
-                    exec(`start "" "${path}"`);
-                    return;
-                }
-
-                showToast(`⚠️  برنامه اجرا نشد. لطفاً به صورت دستی باز کنید.`, '⚠️');
-            } catch (e) {
-                showToast(`⚠️  خطا در اجرا: ${e.message}`, '❌');
-                console.error('Launch error:', e);
-            }
-        }
-
-        // ================================================================
-        //  FILE SELECTION
-        // ================================================================
-        addBtn.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files);
-            for (const file of files) {
-                await addApp(file);
-            }
-            fileInput.value = '';
-        });
-
-        // Drag and Drop
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-        });
-
-        document.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.exe'));
-            for (const file of files) {
-                await addApp(file);
-            }
-        });
-
-        // ================================================================
-        //  BATTERY (real)
-        // ================================================================
-        async function updateBattery() {
-            try {
-                if ('getBattery' in navigator) {
-                    const battery = await navigator.getBattery();
-                    const level = Math.round(battery.level * 100);
-                    batteryLevel.textContent = level + '%';
-                    batteryContainer.style.display = 'flex';
-                } else {
-                    batteryContainer.style.display = 'none';
-                }
-            } catch (_) {
-                batteryContainer.style.display = 'none';
-            }
-        }
-
-        // ================================================================
-        //  CLOCK
-        // ================================================================
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            statusTime.textContent = `${h}:${m}`;
-        }
-
-        // ================================================================
-        //  TOAST
-        // ================================================================
-        function showToast(msg, icon = '✦') {
-            toastMsg.textContent = msg;
-            toastIcon.textContent = icon;
-            toastEl.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
-        }
-
-        // ================================================================
-        //  CONTROLLER SUPPORT (استاندارد و بدون راهنما)
-        // ================================================================
-        let gamepadIndex = null;
-        let gpDebounce = 0;
-
-        function scanGamepads() {
-            const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-            let found = false;
-            for (let i = 0; i < pads.length; i++) {
-                if (pads[i] && pads[i].connected) {
-                    found = true;
-                    gamepadIndex = i;
-                    break;
-                }
-            }
-            if (!found) {
-                gamepadIndex = null;
-            }
-        }
-
-        function processGamepad() {
-            if (gamepadIndex === null) return;
-            const gp = navigator.getGamepads()[gamepadIndex];
-            if (!gp) return;
-
-            const now = Date.now();
-            if (now - gpDebounce < 80) return;
-
-            const axes = gp.axes;
-            const buttons = gp.buttons;
-
-            // جهتیابی با D-Pad / Left Stick
-            let dx = 0,
-                dy = 0;
-            const threshold = 0.4;
-
-            if (Math.abs(axes[0]) > threshold) dx = axes[0] > 0 ? 1 : -1;
-            if (Math.abs(axes[1]) > threshold) dy = axes[1] > 0 ? 1 : -1;
-
-            if (buttons[12] && buttons[12].pressed) dy = -1;
-            if (buttons[13] && buttons[13].pressed) dy = 1;
-            if (buttons[14] && buttons[14].pressed) dx = -1;
-            if (buttons[15] && buttons[15].pressed) dx = 1;
-
-            if (dx !== 0 || dy !== 0) {
-                gpDebounce = now;
-                const total = apps.length;
-                if (total === 0) return;
-
-                let newIdx = selectedIndex;
-                if (dx > 0) newIdx = Math.min(total - 1, selectedIndex + 1);
-                if (dx < 0) newIdx = Math.max(0, selectedIndex - 1);
-
-                if (newIdx !== selectedIndex) {
-                    selectedIndex = newIdx;
-                    playSound('focus');
-                    updateFocus();
-                }
-            }
-
-            // دکمه‌ها
-            const pressed = [];
-            buttons.forEach((b, i) => { if (b.pressed) pressed.push(i); });
-
-            // A / X (0) → اجرا
-            if (pressed.includes(0)) {
-                gpDebounce = now;
-                if (selectedIndex >= 0 && selectedIndex < apps.length) {
-                    launchApp(apps[selectedIndex]);
-                }
-            }
-
-            // B / O (1) → حذف
-            if (pressed.includes(1)) {
-                gpDebounce = now;
-                if (selectedIndex >= 0 && selectedIndex < apps.length) {
-                    removeApp(selectedIndex);
-                }
-            }
-
-            // Y / △ (3) → افزودن
-            if (pressed.includes(3)) {
-                gpDebounce = now;
-                fileInput.click();
-            }
-
-            // Start (9) → خروج از برنامه
-            if (pressed.includes(9)) {
-                gpDebounce = now;
-                showToast('⏹️  خروج از برنامه', '⏹️');
-            }
-        }
-
-        // ================================================================
-        //  KEYBOARD
-        // ================================================================
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                e.preventDefault();
-                const total = apps.length;
-                if (total === 0) return;
-                let newIdx = selectedIndex;
-                if (e.key === 'ArrowRight') newIdx = Math.min(total - 1, selectedIndex + 1);
-                else newIdx = Math.max(0, selectedIndex - 1);
-                if (newIdx !== selectedIndex) {
-                    selectedIndex = newIdx;
-                    playSound('focus');
-                    updateFocus();
-                }
-                return;
-            }
-
-            if (e.key === 'Enter') {
-                if (selectedIndex >= 0 && selectedIndex < apps.length) {
-                    launchApp(apps[selectedIndex]);
-                }
-                return;
-            }
-
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                if (selectedIndex >= 0 && selectedIndex < apps.length) {
-                    removeApp(selectedIndex);
-                }
-                return;
-            }
-
-            if (e.key === '+' || e.key === '=') {
-                e.preventDefault();
-                fileInput.click();
-                return;
-            }
-        });
-
-        // ================================================================
-        //  BACKGROUND
-        // ================================================================
-        function initBackground() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
-            let w, h;
-            const particles = [];
-            const COUNT = 75;
-
-            function resize() {
-                w = canvas.width = window.innerWidth;
-                h = canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            class Particle {
-                constructor() { this.reset(); }
-                reset() {
-                    this.x = Math.random() * w;
-                    this.y = Math.random() * h;
-                    this.vx = (Math.random() - 0.5) * 0.25;
-                    this.vy = (Math.random() - 0.5) * 0.25;
-                    this.r = Math.random() * 2.5 + 0.5;
-                    this.alpha = Math.random() * 0.15 + 0.03;
-                }
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    if (this.x < 0 || this.x > w) this.vx *= -1;
-                    if (this.y < 0 || this.y > h) this.vy *= -1;
-                }
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
-                    ctx.fill();
-                }
-            }
-
-            for (let i = 0; i < COUNT; i++) particles.push(new Particle());
-
-            function drawConnections() {
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 150) {
-                            const alpha = (1 - dist / 150) * 0.06;
-                            ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = `rgba(0,212,255,${alpha})`;
-                            ctx.lineWidth = 0.5;
-                            ctx.stroke();
-                        }
-                    }
-                }
-            }
-
-            function animate() {
-                ctx.clearRect(0, 0, w, h);
-                particles.forEach(p => { p.update();
-                    p.draw(); });
-                drawConnections();
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
-
-        // ================================================================
-        //  GAMEPAD LOOP
-        // ================================================================
-        function gamepadLoop() {
-            scanGamepads();
-            processGamepad();
-            requestAnimationFrame(gamepadLoop);
-        }
-
-        // ================================================================
-        //  INIT
-        // ================================================================
-        async function init() {
-            loadApps();
-            updateClock();
-            await updateBattery();
-            initBackground();
-            initAudio();
-
-            setInterval(updateClock, 10000);
-            setInterval(updateBattery, 60000);
-
-            gamepadLoop();
-
-            window.addEventListener('gamepadconnected', () => {
-                showToast('🎮  کنترلر متصل شد', '🎮');
-                scanGamepads();
-            });
-            window.addEventListener('gamepaddisconnected', () => {
-                showToast('🔌  کنترلر قطع شد', '🔌');
-                gamepadIndex = null;
-            });
-
-            setTimeout(() => showToast('✦  LTC Launcher  ✦', '✨'), 500);
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
-
+    <div class="app-body" id="appBody"></div>
+  </section>
+
+  <section id="control">
+    <div class="cc-grid">
+      <div class="cc-tile on" data-toggle>
+        <div class="icon">📡</div>
+        <div class="label">وای‌فای</div>
+      </div>
+      <div class="cc-tile on" data-toggle>
+        <div class="icon">📶</div>
+        <div class="label">داده موبایل</div>
+      </div>
+      <div class="cc-tile" data-toggle>
+        <div class="icon">💡</div>
+        <div class="label">چراغ‌قوه</div>
+      </div>
+      <div class="cc-tile" data-toggle>
+        <div class="icon">✈️</div>
+        <div class="label">حالت هواپیما</div>
+      </div>
+    </div>
+    <div class="cc-slider">
+      <label>روشنایی</label>
+      <input type="range" min="20" max="100" value="70" id="brightness">
+    </div>
+    <div class="cc-slider">
+      <label>صدا</label>
+      <input type="range" min="0" max="100" value="55">
+    </div>
+    <button class="cc-close" id="ccClose" type="button">بستن</button>
+  </section>
+
+  <div class="home-indicator" id="homeIndicator"></div>
+</div>
+
+<script>
+(function () {
+  const apps = [
+    { id: 'phone', name: 'تلفن', icon: '📞', color: 'linear-gradient(135deg,#34d399,#059669)', dock: true },
+    { id: 'messages', name: 'پیام', icon: '💬', color: 'linear-gradient(135deg,#5b8cff,#2563eb)', dock: true },
+    { id: 'browser', name: 'مرورگر', icon: '🌐', color: 'linear-gradient(135deg,#60a5fa,#1d4ed8)', dock: true },
+    { id: 'settings', name: 'تنظیمات', icon: '⚙️', color: 'linear-gradient(135deg,#94a3b8,#475569)', dock: true },
+    { id: 'yelo', name: 'YELO', icon: '🎵', color: 'linear-gradient(135deg,#f5c842,#d97706)' },
+    { id: 'shop', name: 'فروشگاه', icon: '🛒', color: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+    { id: 'camera', name: 'دوربین', icon: '📷', color: 'linear-gradient(135deg,#64748b,#1e293b)' },
+    { id: 'gallery', name: 'گالری', icon: '🖼️', color: 'linear-gradient(135deg,#f472b6,#db2777)' },
+    { id: 'files', name: 'فایل‌ها', icon: '📁', color: 'linear-gradient(135deg,#fbbf24,#b45309)' },
+    { id: 'notes', name: 'یادداشت', icon: '📝', color: 'linear-gradient(135deg,#fde68a,#ca8a04)' },
+    { id: 'map', name: 'نقشه', icon: '🗺️', color: 'linear-gradient(135deg,#4ade80,#16a34a)' },
+    { id: 'calc', name: 'ماشین‌حساب', icon: '🔢', color: 'linear-gradient(135deg,#e2e8f0,#64748b)' }
+  ];
+
+  const appContent = {
+    phone: { title: 'تلفن', html: '<div class="app-card"><h3>شماره‌گیر LumenOS</h3><p>رابط تماس ترکیبی از سادگی iOS و دسترسی سریع Android.</p><div class="chip-row"><span class="chip">تماس اخیر</span><span class="chip">مخاطبین</span><span class="chip">صفحه‌کلید</span></div></div>' },
+    messages: { title: 'پیام‌ها', html: '<div class="app-card"><h3>مرکز پیام</h3><p>پیام‌رسانی یکپارچه با اعلان‌های هوشمند و اولویت‌بندی مکالمات.</p></div><div class="app-card"><h3>LTC Support</h3><p>سلام! سفارش شما ثبت شد.</p></div>' },
+    browser: { title: 'مرورگر', html: '<div class="app-card"><h3>Lumen Browser</h3><p>موتور سریع، حالت تاریک پیش‌فرض، و حریم خصوصی بالاتر.</p><div class="chip-row"><span class="chip">https://ltc</span><span class="chip">نشانک‌ها</span></div></div>' },
+    settings: { title: 'تنظیمات', html: '<div class="app-card"><h3>سیستم</h3><p>نمایش · صدا · شبکه · حریم خصوصی · درباره LumenOS</p></div><div class="app-card"><h3>نسخه</h3><p>LumenOS Preview 1.0 · LTC</p></div>' },
+    yelo: { title: 'YELO Music', html: '<div class="app-card"><h3>پخش‌کننده موسیقی</h3><p>همان تجربه YELO با تم سیستم و کنترل‌های یکپارچه.</p><div class="chip-row"><span class="chip">صفحه اصلی</span><span class="chip">علاقه‌مندی</span><span class="chip">Display Mode</span></div></div>' },
+    shop: { title: 'فروشگاه LTC', html: '<div class="app-card"><h3>خدمات دیجیتال</h3><p>ادیت · پاورپوینت · ورد · اکسل — سفارش مستقیم از سیستم‌عامل.</p></div>' },
+    camera: { title: 'دوربین', html: '<div class="app-card"><h3>دوربین هوشمند</h3><p>حالت پرتره، شب، و ویدیو — الهام از بهترین تجربه‌های موبایل.</p></div>' },
+    gallery: { title: 'گالری', html: '<div class="app-card"><h3>آلبوم‌ها</h3><p>مرتب‌سازی خودکار، جستجوی هوشمند، و اشتراک سریع.</p></div>' },
+    files: { title: 'فایل‌ها', html: '<div class="app-card"><h3>مدیریت فایل</h3><p>نمای درختی ویندوزی + دسترسی سریع اندرویدی.</p></div>' },
+    notes: { title: 'یادداشت', html: '<div class="app-card"><h3>یادداشت سریع</h3><p>برای ایده، لیست کارها و یادآوری‌های روزانه.</p></div>' },
+    map: { title: 'نقشه', html: '<div class="app-card"><h3>نقشه و مسیر</h3><p>مسیریابی، مکان‌های ذخیره‌شده و ترافیک زنده.</p></div>' },
+    calc: { title: 'ماشین‌حساب', html: '<div class="app-card"><h3>ماشین‌حساب</h3><p>پایه و علمی — همیشه در دسترس از داک یا صفحه اصلی.</p></div>' }
+  };
+
+  const lock = document.getElementById('lock');
+  const home = document.getElementById('home');
+  const appWindow = document.getElementById('app-window');
+  const control = document.getElementById('control');
+  const appsGrid = document.getElementById('appsGrid');
+  const dock = document.getElementById('dock');
+
+  function makeAppButton(app) {
+    const btn = document.createElement('button');
+    btn.className = 'app';
+    btn.type = 'button';
+    btn.innerHTML = '<div class="app-icon" style="background:' + app.color + '">' + app.icon + '</div><span class="app-name">' + app.name + '</span>';
+    btn.addEventListener('click', function () { openApp(app.id); });
+    return btn;
+  }
+
+  apps.forEach(function (app) {
+    if (!app.dock) appsGrid.appendChild(makeAppButton(app));
+  });
+  apps.filter(function (a) { return a.dock; }).forEach(function (app) {
+    dock.appendChild(makeAppButton(app));
+  });
+
+  function showScreen(el) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  function unlock() {
+    showScreen(home);
+  }
+
+  function openApp(id) {
+    const data = appContent[id] || { title: 'برنامه', html: '<div class="app-card"><p>این یک پیش‌نمایش رابط است.</p></div>' };
+    document.getElementById('appTitle').textContent = data.title;
+    document.getElementById('appBody').innerHTML = data.html;
+    showScreen(appWindow);
+  }
+
+  document.getElementById('appBack').addEventListener('click', function () {
+    showScreen(home);
+  });
+
+  let startY = null;
+  lock.addEventListener('touchstart', function (e) {
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  lock.addEventListener('touchend', function (e) {
+    if (startY === null) return;
+    const dy = startY - e.changedTouches[0].clientY;
+    if (dy > 40) unlock();
+    startY = null;
+  });
+  lock.addEventListener('click', unlock);
+
+  document.getElementById('homeIndicator').addEventListener('click', function () {
+    control.classList.remove('open');
+    showScreen(home);
+  });
+
+  document.getElementById('pullZone').addEventListener('click', function () {
+    control.classList.add('open');
+  });
+  document.getElementById('ccClose').addEventListener('click', function () {
+    control.classList.remove('open');
+  });
+  document.querySelectorAll('[data-toggle]').forEach(function (tile) {
+    tile.addEventListener('click', function () {
+      tile.classList.toggle('on');
+    });
+  });
+  document.getElementById('brightness').addEventListener('input', function (e) {
+    document.querySelector('.wallpaper').style.filter = 'brightness(' + (e.target.value / 100) + ')';
+  });
+
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const t = h + ':' + m;
+    document.getElementById('statusTime').textContent = t;
+    document.getElementById('lockClock').textContent = t;
+    document.getElementById('homeClock').textContent = t;
+    const days = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+    const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+    const dayName = days[now.getDay()];
+    const dateText = dayName + ' · ' + now.getDate() + ' ' + months[Math.min(now.getMonth(), 11)];
+    document.getElementById('lockDate').textContent = dateText;
+    document.getElementById('homeDate').textContent = dateText;
+  }
+  updateClock();
+  setInterval(updateClock, 15000);
+
+  document.getElementById('musicBtn').addEventListener('click', function () {
+    openApp('yelo');
+  });
+})();
+</script>
 </body>
 </html>
