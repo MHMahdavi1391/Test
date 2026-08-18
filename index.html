@@ -5,675 +5,223 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0a0c10">
+<meta name="theme-color" content="#07090d">
 <title>LumenOS</title>
 <style>
-  :root {
-    --bg: #0a0c10;
-    --surface: rgba(255,255,255,0.08);
-    --surface-2: rgba(255,255,255,0.12);
-    --border: rgba(255,255,255,0.1);
-    --text: #f5f7fa;
-    --text-2: rgba(245,247,250,0.7);
-    --text-3: rgba(245,247,250,0.45);
-    --accent: #f5c842;
-    --accent-2: #5b8cff;
-    --green: #34d399;
-    --red: #f87171;
-    --radius: 22px;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    height: 100%;
-    overflow: hidden;
-    font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
-    background: #000;
-    color: var(--text);
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .phone {
-    width: 100%;
-    height: 100%;
-    max-width: 430px;
-    max-height: 100dvh;
-    position: relative;
-    overflow: hidden;
-    background: #0a0c10;
-  }
-  @media (min-width: 480px) {
-    body { background: #111; }
-    .phone {
-      height: min(860px, 96vh);
-      border-radius: 36px;
-      box-shadow: 0 0 0 10px #1a1a1a, 0 25px 80px rgba(0,0,0,0.6);
-    }
-  }
-
-  .wallpaper {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(91,140,255,0.35), transparent 55%),
-      radial-gradient(ellipse 70% 45% at 90% 20%, rgba(245,200,66,0.22), transparent 50%),
-      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(52,211,153,0.12), transparent 50%),
-      linear-gradient(160deg, #0b1020 0%, #0a0c10 45%, #121018 100%);
-    z-index: 0;
-  }
-
-  .status-bar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    z-index: 50;
-    padding: calc(10px + var(--safe-top)) 18px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.78rem;
-    font-weight: 600;
-    pointer-events: none;
-  }
-  .status-left, .status-right { display: flex; align-items: center; gap: 8px; }
-  .status-icons { display: flex; align-items: center; gap: 6px; opacity: 0.9; }
-  .battery { display: flex; align-items: center; gap: 4px; }
-  .battery-body {
-    width: 22px; height: 11px; border: 1.5px solid rgba(255,255,255,0.7);
-    border-radius: 3px; padding: 1px; position: relative;
-  }
-  .battery-body::after {
-    content: ''; position: absolute; right: -3px; top: 2px;
-    width: 2px; height: 5px; background: rgba(255,255,255,0.7); border-radius: 0 1px 1px 0;
-  }
-  .battery-level { height: 100%; width: 78%; background: var(--green); border-radius: 1px; }
-
-  .screen {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    display: none;
-    flex-direction: column;
-  }
-  .screen.active { display: flex; }
-
-  #lock {
-    justify-content: space-between;
-    padding: calc(70px + var(--safe-top)) 24px calc(40px + var(--safe-bottom));
-    z-index: 40;
-  }
-  .lock-time { text-align: center; }
-  .lock-clock {
-    font-size: 4.2rem;
-    font-weight: 200;
-    letter-spacing: -0.04em;
-    line-height: 1;
-  }
-  .lock-date {
-    margin-top: 8px;
-    font-size: 1.05rem;
-    color: var(--text-2);
-    font-weight: 500;
-  }
-  .lock-hint {
-    text-align: center;
-    color: var(--text-3);
-    font-size: 0.85rem;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.9; }
-  }
-  .lock-swipe {
-    width: 40px; height: 4px;
-    background: rgba(255,255,255,0.35);
-    border-radius: 4px;
-    margin: 0 auto 14px;
-  }
-
-  #home {
-    padding-top: calc(48px + var(--safe-top));
-    padding-bottom: calc(88px + var(--safe-bottom));
-  }
-  .home-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 18px 16px;
-    scrollbar-width: none;
-  }
-  .home-scroll::-webkit-scrollbar { display: none; }
-
-  .search-pill {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 11px 16px;
-    margin-bottom: 18px;
-    color: var(--text-3);
-    font-size: 0.9rem;
-  }
-
-  .widget {
-    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 18px;
-    margin-bottom: 14px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  .widget-row {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-  .widget-time .big {
-    font-size: 2.4rem;
-    font-weight: 300;
-    letter-spacing: -0.03em;
-  }
-  .widget-time .sub {
-    color: var(--text-2);
-    font-size: 0.85rem;
-    margin-top: 4px;
-  }
-  .widget-weather {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .widget-weather .temp { font-size: 1.8rem; font-weight: 600; }
-  .widget-weather .city { color: var(--text-2); font-size: 0.82rem; }
-  .widget-music {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .widget-music .cover {
-    width: 52px; height: 52px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), #e89a20);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem;
-    flex-shrink: 0;
-  }
-  .widget-music .meta { flex: 1; min-width: 0; }
-  .widget-music .title {
-    font-weight: 600;
-    font-size: 0.92rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .widget-music .artist { color: var(--text-3); font-size: 0.78rem; }
-  .widget-music .play {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--surface-2);
-    border: none;
-    color: var(--text);
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
-
-  .apps-label {
-    font-size: 0.78rem;
-    color: var(--text-3);
-    margin: 6px 4px 10px;
-    font-weight: 600;
-  }
-  .apps-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px 10px;
-    margin-bottom: 20px;
-  }
-  .app {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: var(--text);
-  }
-  .app-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.55rem;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    transition: transform 0.15s ease;
-  }
-  .app:active .app-icon { transform: scale(0.9); }
-  .app-name {
-    font-size: 0.7rem;
-    color: var(--text-2);
-    text-align: center;
-    max-width: 70px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dock {
-    position: absolute;
-    bottom: calc(14px + var(--safe-bottom));
-    left: 16px; right: 16px;
-    z-index: 30;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 12px 10px;
-    background: rgba(20, 24, 32, 0.72);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-  }
-  .dock .app-icon {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    font-size: 1.35rem;
-  }
-  .dock .app-name { display: none; }
-
-  #app-window {
-    z-index: 35;
-    background: #0e1218;
-  }
-  .app-header {
-    padding: calc(14px + var(--safe-top)) 16px 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(14,18,24,0.95);
-  }
-  .app-back {
-    border: none;
-    background: var(--surface);
-    color: var(--text);
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  .app-header h2 {
-    font-size: 1.05rem;
-    font-weight: 700;
-  }
-  .app-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 18px calc(24px + var(--safe-bottom));
-  }
-  .app-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .app-card h3 {
-    font-size: 0.95rem;
-    margin-bottom: 6px;
-  }
-  .app-card p {
-    color: var(--text-2);
-    font-size: 0.85rem;
-    line-height: 1.6;
-  }
-  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .chip {
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(245,200,66,0.12);
-    color: var(--accent);
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid rgba(245,200,66,0.25);
-  }
-
-  #control {
-    z-index: 45;
-    background: rgba(8,10,14,0.55);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    padding: calc(56px + var(--safe-top)) 18px 24px;
-    display: none;
-    flex-direction: column;
-    gap: 12px;
-  }
-  #control.open { display: flex; }
-  .cc-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .cc-tile {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 16px;
-    min-height: 90px;
-  }
-  .cc-tile.on {
-    background: rgba(91,140,255,0.35);
-    border-color: rgba(91,140,255,0.5);
-  }
-  .cc-tile .label {
-    font-size: 0.8rem;
-    margin-top: 10px;
-    font-weight: 600;
-  }
-  .cc-tile .icon { font-size: 1.3rem; }
-  .cc-slider {
-    background: rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 16px;
-    border: 1px solid var(--border);
-  }
-  .cc-slider label {
-    font-size: 0.8rem;
-    color: var(--text-2);
-    display: block;
-    margin-bottom: 10px;
-  }
-  .cc-slider input[type=range] {
-    width: 100%;
-    accent-color: var(--accent);
-  }
-  .cc-close {
-    margin-top: auto;
-    align-self: center;
-    border: none;
-    background: var(--surface-2);
-    color: var(--text);
-    padding: 10px 24px;
-    border-radius: 999px;
-    font-size: 0.85rem;
-    cursor: pointer;
-  }
-
-  .home-indicator {
-    position: absolute;
-    bottom: calc(6px + var(--safe-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 110px;
-    height: 4px;
-    background: rgba(255,255,255,0.35);
-    border-radius: 4px;
-    z-index: 60;
-  }
-
-  .pull-zone {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: calc(28px + var(--safe-top));
-    z-index: 55;
-  }
-
-  .brand {
-    text-align: center;
-    font-size: 0.7rem;
-    color: var(--text-3);
-    margin-top: 8px;
-    letter-spacing: 0.08em;
-  }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
+body{display:flex;align-items:center;justify-content:center}
+.phone{width:100%;height:100%;max-width:390px;max-height:100dvh;position:relative;overflow:hidden;background:#07090d}
+@media(min-width:420px){
+  body{background:#0c0c0e}
+  .phone{height:min(844px,94vh);border-radius:44px;box-shadow:0 0 0 12px #1c1c1e,0 30px 80px rgba(0,0,0,.7)}
+  .phone::before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:28px;background:#000;border-radius:20px;z-index:100}
+}
+.wall{position:absolute;inset:0;background:
+  radial-gradient(ellipse 90% 60% at 50% -10%,#1a2744 0%,transparent 55%),
+  radial-gradient(ellipse 70% 50% at 100% 40%,rgba(120,90,200,.18),transparent 50%),
+  radial-gradient(ellipse 60% 40% at 0% 70%,rgba(40,120,180,.12),transparent 45%),
+  linear-gradient(180deg,#0b1220 0%,#07090d 55%,#0a0c12 100%);
+  transition:filter .2s}
+.sb{position:absolute;top:0;left:0;right:0;z-index:80;padding:calc(12px + env(safe-area-inset-top,0px)) 22px 0;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;pointer-events:none}
+.sb-r{display:flex;align-items:center;gap:7px}
+.sig{display:flex;gap:2px;align-items:flex-end;height:10px}
+.sig i{display:block;width:3px;background:#fff;border-radius:1px}
+.sig i:nth-child(1){height:3px}.sig i:nth-child(2){height:5px}.sig i:nth-child(3){height:7px}.sig i:nth-child(4){height:10px;opacity:.35}
+.wifi{width:14px;height:10px;border:2px solid #fff;border-top:none;border-radius:0 0 8px 8px;position:relative;opacity:.95}
+.wifi::before{content:"";position:absolute;top:-5px;left:1px;width:8px;height:8px;border:2px solid #fff;border-bottom:none;border-radius:8px 8px 0 0}
+.bat{width:24px;height:11px;border:1.5px solid rgba(255,255,255,.85);border-radius:3px;padding:1px;position:relative}
+.bat::after{content:"";position:absolute;right:-3.5px;top:2.5px;width:2px;height:5px;background:rgba(255,255,255,.85);border-radius:0 1px 1px 0}
+.bat b{display:block;height:100%;width:72%;background:#30d158;border-radius:1px}
+.scr{position:absolute;inset:0;display:none;flex-direction:column;z-index:10;opacity:0;transition:opacity .28s ease}
+.scr.on{display:flex;opacity:1}
+#lock{z-index:40;justify-content:space-between;padding:calc(88px + env(safe-area-inset-top,0px)) 28px calc(36px + env(safe-area-inset-bottom,0px));text-align:center}
+.lock-clock{font-size:76px;font-weight:200;letter-spacing:-3px;line-height:1}
+.lock-date{margin-top:6px;font-size:18px;font-weight:500;color:rgba(255,255,255,.78)}
+.lock-bottom{padding-bottom:8px}
+.lock-hint{font-size:13px;color:rgba(255,255,255,.4);margin-top:14px}
+.grab{width:36px;height:4px;background:rgba(255,255,255,.28);border-radius:4px;margin:0 auto}
+#home{padding-top:calc(52px + env(safe-area-inset-top,0px));padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.scroll{flex:1;overflow-y:auto;padding:4px 20px 12px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 14px;margin-bottom:16px;color:rgba(255,255,255,.4);font-size:15px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.row{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-bottom:12px}
+.w{border-radius:22px;padding:16px;background:rgba(255,255,255,.1);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.w-clock .t{font-size:42px;font-weight:300;letter-spacing:-1.5px;line-height:1}
+.w-clock .d{margin-top:4px;font-size:13px;color:rgba(255,255,255,.55)}
+.w-weather{display:flex;flex-direction:column;justify-content:center}
+.w-weather .tmp{font-size:32px;font-weight:300}
+.w-weather .info{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px}
+.w-music{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.cover{width:48px;height:48px;border-radius:12px;background:linear-gradient(145deg,#f5c842,#c47a10);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 6px 16px rgba(196,122,16,.35)}
+.meta{flex:1;min-width:0}
+.meta .tt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta .ar{font-size:12px;color:rgba(255,255,255,.45);margin-top:2px}
+.play{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:12px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px}
+.app{border:none;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.ic{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 10px 24px rgba(0,0,0,.28);transition:transform .12s}
+.app:active .ic{transform:scale(.88)}
+.nm{font-size:11px;color:rgba(255,255,255,.72);max-width:72px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock{position:absolute;left:16px;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;justify-content:space-around;padding:14px 8px;border-radius:28px;background:rgba(30,30,35,.55);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,.1)}
+.dock .ic{width:54px;height:54px;border-radius:15px;font-size:24px}
+.dock .nm{display:none}
+#app{z-index:35;background:#0c0e12}
+.ah{padding:calc(16px + env(safe-area-inset-top,0px)) 16px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.back{width:34px;height:34px;border-radius:10px;border:none;background:rgba(255,255,255,.08);color:#fff;font-size:16px;cursor:pointer}
+.ah h2{font-size:17px;font-weight:650}
+.ab{flex:1;overflow-y:auto;padding:18px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{font-size:15px;margin-bottom:6px}
+.card p{font-size:13px;line-height:1.65;color:rgba(255,255,255,.55)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{font-size:11px;padding:5px 10px;border-radius:999px;background:rgba(245,200,66,.12);color:#f5c842;border:1px solid rgba(245,200,66,.22)}
+#cc{position:absolute;inset:0;z-index:90;display:none;flex-direction:column;padding:calc(58px + env(safe-area-inset-top,0px)) 16px 24px;background:rgba(10,12,16,.45);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px)}
+#cc.open{display:flex}
+.ccg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cct{border-radius:20px;padding:16px;min-height:88px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08)}
+.cct.on{background:rgba(10,132,255,.45);border-color:rgba(10,132,255,.35)}
+.cct .i{font-size:22px}
+.cct .l{margin-top:12px;font-size:13px;font-weight:600}
+.ccs{margin-top:12px;background:rgba(255,255,255,.1);border-radius:20px;padding:14px 16px;border:1px solid rgba(255,255,255,.08)}
+.ccs label{display:block;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:10px}
+.ccs input{width:100%;accent-color:#0a84ff}
+.ccc{margin:18px auto 0;border:none;background:rgba(255,255,255,.12);color:#fff;padding:10px 28px;border-radius:999px;font-size:14px;cursor:pointer}
+.hi{position:absolute;bottom:calc(7px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:120px;height:4px;background:rgba(255,255,255,.28);border-radius:4px;z-index:95}
+.pull{position:absolute;top:0;left:0;right:0;height:calc(26px + env(safe-area-inset-top,0px));z-index:85}
 </style>
 </head>
 <body>
-<div class="phone" id="phone">
-  <div class="wallpaper"></div>
-
-  <div class="status-bar" id="statusBar">
-    <div class="status-left"><span id="statusTime">12:00</span></div>
-    <div class="status-right">
-      <div class="status-icons">
-        <span>▮▮▮</span>
-        <span>Wi‑Fi</span>
-      </div>
-      <div class="battery">
-        <span id="batText">78%</span>
-        <div class="battery-body"><div class="battery-level"></div></div>
-      </div>
+<div class="phone">
+  <div class="wall" id="wall"></div>
+  <div class="sb">
+    <span id="st">09:41</span>
+    <div class="sb-r">
+      <div class="sig"><i></i><i></i><i></i><i></i></div>
+      <div class="wifi"></div>
+      <div class="bat"><b></b></div>
     </div>
   </div>
+  <div class="pull" id="pull"></div>
 
-  <div class="pull-zone" id="pullZone"></div>
-
-  <section class="screen active" id="lock">
-    <div class="lock-time">
-      <div class="lock-clock" id="lockClock">12:00</div>
-      <div class="lock-date" id="lockDate">دوشنبه ۱۸ مرداد</div>
-    </div>
+  <section class="scr on" id="lock">
     <div>
-      <div class="lock-swipe"></div>
-      <div class="lock-hint">برای باز کردن به بالا بکشید</div>
-      <div class="brand">LUMENOS · LTC</div>
+      <div class="lock-clock" id="lc">09:41</div>
+      <div class="lock-date" id="ld">دوشنبه ۱۸ مرداد</div>
+    </div>
+    <div class="lock-bottom">
+      <div class="grab"></div>
+      <div class="lock-hint">برای ورود ضربه بزنید</div>
     </div>
   </section>
 
-  <section class="screen" id="home">
-    <div class="home-scroll">
-      <div class="search-pill">🔍 جستجو در LumenOS</div>
-
-      <div class="widget-row">
-        <div class="widget widget-time">
-          <div class="big" id="homeClock">12:00</div>
-          <div class="sub" id="homeDate">دوشنبه · ۱۸ مرداد</div>
+  <section class="scr" id="home">
+    <div class="scroll">
+      <div class="search">⌕  جستجو</div>
+      <div class="row">
+        <div class="w w-clock">
+          <div class="t" id="hc">09:41</div>
+          <div class="d" id="hd">دوشنبه</div>
         </div>
-        <div class="widget widget-weather">
-          <div class="temp">۲۸°</div>
-          <div class="city">تهران · آفتابی</div>
+        <div class="w w-weather">
+          <div class="tmp">۲۸°</div>
+          <div class="info">تهران · صاف</div>
         </div>
       </div>
-
-      <div class="widget widget-music">
+      <div class="w w-music">
         <div class="cover">♪</div>
-        <div class="meta">
-          <div class="title">YELO Player</div>
-          <div class="artist">پخش موسیقی LTC</div>
-        </div>
-        <button class="play" type="button" id="musicBtn">▶</button>
+        <div class="meta"><div class="tt">YELO Music</div><div class="ar">LTC Player</div></div>
+        <button class="play" id="mb" type="button">▶</button>
       </div>
-
-      <div class="apps-label">برنامه‌ها</div>
-      <div class="apps-grid" id="appsGrid"></div>
+      <div class="grid" id="grid"></div>
     </div>
-
     <nav class="dock" id="dock"></nav>
   </section>
 
-  <section class="screen" id="app-window">
-    <div class="app-header">
-      <button class="app-back" id="appBack" type="button">←</button>
-      <h2 id="appTitle">برنامه</h2>
-    </div>
-    <div class="app-body" id="appBody"></div>
+  <section class="scr" id="app">
+    <div class="ah"><button class="back" id="bk" type="button">›</button><h2 id="at">App</h2></div>
+    <div class="ab" id="ab"></div>
   </section>
 
-  <section id="control">
-    <div class="cc-grid">
-      <div class="cc-tile on" data-toggle>
-        <div class="icon">📡</div>
-        <div class="label">وای‌فای</div>
-      </div>
-      <div class="cc-tile on" data-toggle>
-        <div class="icon">📶</div>
-        <div class="label">داده موبایل</div>
-      </div>
-      <div class="cc-tile" data-toggle>
-        <div class="icon">💡</div>
-        <div class="label">چراغ‌قوه</div>
-      </div>
-      <div class="cc-tile" data-toggle>
-        <div class="icon">✈️</div>
-        <div class="label">حالت هواپیما</div>
-      </div>
+  <div id="cc">
+    <div class="ccg">
+      <div class="cct on" data-t><div class="i">⌃</div><div class="l">وای‌فای</div></div>
+      <div class="cct on" data-t><div class="i">▮</div><div class="l">داده</div></div>
+      <div class="cct" data-t><div class="i">✦</div><div class="l">چراغ‌قوه</div></div>
+      <div class="cct" data-t><div class="i">✈</div><div class="l">هواپیما</div></div>
     </div>
-    <div class="cc-slider">
-      <label>روشنایی</label>
-      <input type="range" min="20" max="100" value="70" id="brightness">
-    </div>
-    <div class="cc-slider">
-      <label>صدا</label>
-      <input type="range" min="0" max="100" value="55">
-    </div>
-    <button class="cc-close" id="ccClose" type="button">بستن</button>
-  </section>
-
-  <div class="home-indicator" id="homeIndicator"></div>
+    <div class="ccs"><label>روشنایی</label><input type="range" min="25" max="100" value="80" id="br"></div>
+    <div class="ccs"><label>صدا</label><input type="range" min="0" max="100" value="50"></div>
+    <button class="ccc" id="cx" type="button">بستن</button>
+  </div>
+  <div class="hi" id="hi"></div>
 </div>
-
 <script>
-(function () {
-  const apps = [
-    { id: 'phone', name: 'تلفن', icon: '📞', color: 'linear-gradient(135deg,#34d399,#059669)', dock: true },
-    { id: 'messages', name: 'پیام', icon: '💬', color: 'linear-gradient(135deg,#5b8cff,#2563eb)', dock: true },
-    { id: 'browser', name: 'مرورگر', icon: '🌐', color: 'linear-gradient(135deg,#60a5fa,#1d4ed8)', dock: true },
-    { id: 'settings', name: 'تنظیمات', icon: '⚙️', color: 'linear-gradient(135deg,#94a3b8,#475569)', dock: true },
-    { id: 'yelo', name: 'YELO', icon: '🎵', color: 'linear-gradient(135deg,#f5c842,#d97706)' },
-    { id: 'shop', name: 'فروشگاه', icon: '🛒', color: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
-    { id: 'camera', name: 'دوربین', icon: '📷', color: 'linear-gradient(135deg,#64748b,#1e293b)' },
-    { id: 'gallery', name: 'گالری', icon: '🖼️', color: 'linear-gradient(135deg,#f472b6,#db2777)' },
-    { id: 'files', name: 'فایل‌ها', icon: '📁', color: 'linear-gradient(135deg,#fbbf24,#b45309)' },
-    { id: 'notes', name: 'یادداشت', icon: '📝', color: 'linear-gradient(135deg,#fde68a,#ca8a04)' },
-    { id: 'map', name: 'نقشه', icon: '🗺️', color: 'linear-gradient(135deg,#4ade80,#16a34a)' },
-    { id: 'calc', name: 'ماشین‌حساب', icon: '🔢', color: 'linear-gradient(135deg,#e2e8f0,#64748b)' }
+(function(){
+  var apps=[
+    {id:'phone',n:'تلفن',i:'📞',c:'linear-gradient(160deg,#30d158,#248a3d)',d:1},
+    {id:'msg',n:'پیام',i:'💬',c:'linear-gradient(160deg,#30d158,#0b7a3b)',d:1},
+    {id:'web',n:'سافاری',i:'🧭',c:'linear-gradient(160deg,#64d2ff,#0a84ff)',d:1},
+    {id:'set',n:'تنظیمات',i:'⚙️',c:'linear-gradient(160deg,#8e8e93,#636366)',d:1},
+    {id:'yelo',n:'YELO',i:'🎵',c:'linear-gradient(160deg,#f5c842,#c47a10)'},
+    {id:'shop',n:'فروشگاه',i:'🛍️',c:'linear-gradient(160deg,#bf5af2,#7d3cff)'},
+    {id:'cam',n:'دوربین',i:'📷',c:'linear-gradient(160deg,#636366,#3a3a3c)'},
+    {id:'gal',n:'عکس‌ها',i:'🖼️',c:'linear-gradient(160deg,#ff375f,#d70015)'},
+    {id:'files',n:'فایل',i:'📁',c:'linear-gradient(160deg,#ffd60a,#c93400)'},
+    {id:'note',n:'یادداشت',i:'📝',c:'linear-gradient(160deg,#ffd60a,#ff9f0a)'},
+    {id:'map',n:'نقشه',i:'🗺️',c:'linear-gradient(160deg,#30d158,#0088ff)'},
+    {id:'calc',n:'ماشین‌حساب',i:'🧮',c:'linear-gradient(160deg,#d1d1d6,#8e8e93)'}
   ];
-
-  const appContent = {
-    phone: { title: 'تلفن', html: '<div class="app-card"><h3>شماره‌گیر LumenOS</h3><p>رابط تماس ترکیبی از سادگی iOS و دسترسی سریع Android.</p><div class="chip-row"><span class="chip">تماس اخیر</span><span class="chip">مخاطبین</span><span class="chip">صفحه‌کلید</span></div></div>' },
-    messages: { title: 'پیام‌ها', html: '<div class="app-card"><h3>مرکز پیام</h3><p>پیام‌رسانی یکپارچه با اعلان‌های هوشمند و اولویت‌بندی مکالمات.</p></div><div class="app-card"><h3>LTC Support</h3><p>سلام! سفارش شما ثبت شد.</p></div>' },
-    browser: { title: 'مرورگر', html: '<div class="app-card"><h3>Lumen Browser</h3><p>موتور سریع، حالت تاریک پیش‌فرض، و حریم خصوصی بالاتر.</p><div class="chip-row"><span class="chip">https://ltc</span><span class="chip">نشانک‌ها</span></div></div>' },
-    settings: { title: 'تنظیمات', html: '<div class="app-card"><h3>سیستم</h3><p>نمایش · صدا · شبکه · حریم خصوصی · درباره LumenOS</p></div><div class="app-card"><h3>نسخه</h3><p>LumenOS Preview 1.0 · LTC</p></div>' },
-    yelo: { title: 'YELO Music', html: '<div class="app-card"><h3>پخش‌کننده موسیقی</h3><p>همان تجربه YELO با تم سیستم و کنترل‌های یکپارچه.</p><div class="chip-row"><span class="chip">صفحه اصلی</span><span class="chip">علاقه‌مندی</span><span class="chip">Display Mode</span></div></div>' },
-    shop: { title: 'فروشگاه LTC', html: '<div class="app-card"><h3>خدمات دیجیتال</h3><p>ادیت · پاورپوینت · ورد · اکسل — سفارش مستقیم از سیستم‌عامل.</p></div>' },
-    camera: { title: 'دوربین', html: '<div class="app-card"><h3>دوربین هوشمند</h3><p>حالت پرتره، شب، و ویدیو — الهام از بهترین تجربه‌های موبایل.</p></div>' },
-    gallery: { title: 'گالری', html: '<div class="app-card"><h3>آلبوم‌ها</h3><p>مرتب‌سازی خودکار، جستجوی هوشمند، و اشتراک سریع.</p></div>' },
-    files: { title: 'فایل‌ها', html: '<div class="app-card"><h3>مدیریت فایل</h3><p>نمای درختی ویندوزی + دسترسی سریع اندرویدی.</p></div>' },
-    notes: { title: 'یادداشت', html: '<div class="app-card"><h3>یادداشت سریع</h3><p>برای ایده، لیست کارها و یادآوری‌های روزانه.</p></div>' },
-    map: { title: 'نقشه', html: '<div class="app-card"><h3>نقشه و مسیر</h3><p>مسیریابی، مکان‌های ذخیره‌شده و ترافیک زنده.</p></div>' },
-    calc: { title: 'ماشین‌حساب', html: '<div class="app-card"><h3>ماشین‌حساب</h3><p>پایه و علمی — همیشه در دسترس از داک یا صفحه اصلی.</p></div>' }
+  var body={
+    phone:'<div class="card"><h3>تلفن</h3><p>شماره‌گیر مینیمال با دسترسی سریع به مخاطبین و تماس‌های اخیر.</p><div class="chips"><span class="chip">اخیر</span><span class="chip">مخاطبین</span></div></div>',
+    msg:'<div class="card"><h3>پیام‌ها</h3><p>گفت‌وگوهای یکپارچه با اعلان هوشمند.</p></div><div class="card"><h3>LTC</h3><p>سفارش شما ثبت شد.</p></div>',
+    web:'<div class="card"><h3>مرورگر</h3><p>سریع، خصوصی، حالت تاریک پیش‌فرض.</p></div>',
+    set:'<div class="card"><h3>تنظیمات سیستم</h3><p>نمایش، صدا، شبکه، حریم خصوصی</p></div><div class="card"><h3>LumenOS</h3><p>نسخه پیش‌نمایش ۱.۰ · LTC</p></div>',
+    yelo:'<div class="card"><h3>YELO Music</h3><p>پخش‌کننده اختصاصی با Display Mode.</p><div class="chips"><span class="chip">کتابخانه</span><span class="chip">علاقه‌مندی</span></div></div>',
+    shop:'<div class="card"><h3>فروشگاه LTC</h3><p>خدمات دیجیتال: ادیت، پاورپوینت، ورد، اکسل.</p></div>',
+    cam:'<div class="card"><h3>دوربین</h3><p>حالت‌های عکس، ویدیو و پرتره.</p></div>',
+    gal:'<div class="card"><h3>گالری</h3><p>آلبوم‌ها و خاطرات.</p></div>',
+    files:'<div class="card"><h3>مدیریت فایل</h3><p>دسترسی سریع به اسناد و رسانه‌ها.</p></div>',
+    note:'<div class="card"><h3>یادداشت</h3><p>ثبت سریع ایده‌ها.</p></div>',
+    map:'<div class="card"><h3>نقشه</h3><p>مسیریابی و مکان‌های ذخیره‌شده.</p></div>',
+    calc:'<div class="card"><h3>ماشین‌حساب</h3><p>پایه و علمی.</p></div>'
   };
-
-  const lock = document.getElementById('lock');
-  const home = document.getElementById('home');
-  const appWindow = document.getElementById('app-window');
-  const control = document.getElementById('control');
-  const appsGrid = document.getElementById('appsGrid');
-  const dock = document.getElementById('dock');
-
-  function makeAppButton(app) {
-    const btn = document.createElement('button');
-    btn.className = 'app';
-    btn.type = 'button';
-    btn.innerHTML = '<div class="app-icon" style="background:' + app.color + '">' + app.icon + '</div><span class="app-name">' + app.name + '</span>';
-    btn.addEventListener('click', function () { openApp(app.id); });
-    return btn;
+  var grid=document.getElementById('grid'), dock=document.getElementById('dock');
+  function btn(a){
+    var b=document.createElement('button');b.className='app';b.type='button';
+    b.innerHTML='<div class="ic" style="background:'+a.c+'">'+a.i+'</div><span class="nm">'+a.n+'</span>';
+    b.onclick=function(){openApp(a.id,a.n)};return b;
   }
+  apps.forEach(function(a){if(!a.d)grid.appendChild(btn(a))});
+  apps.filter(function(a){return a.d}).forEach(function(a){dock.appendChild(btn(a))});
 
-  apps.forEach(function (app) {
-    if (!app.dock) appsGrid.appendChild(makeAppButton(app));
-  });
-  apps.filter(function (a) { return a.dock; }).forEach(function (app) {
-    dock.appendChild(makeAppButton(app));
-  });
-
-  function showScreen(el) {
-    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
-    el.classList.add('active');
+  function show(id){
+    document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');s.style.display='none'});
+    var el=document.getElementById(id);el.style.display='flex';requestAnimationFrame(function(){el.classList.add('on')});
   }
-
-  function unlock() {
-    showScreen(home);
+  function openApp(id,name){
+    document.getElementById('at').textContent=name||'App';
+    document.getElementById('ab').innerHTML=body[id]||'<div class="card"><p>پیش‌نمایش</p></div>';
+    show('app');
   }
+  document.getElementById('lock').onclick=function(){show('home')};
+  document.getElementById('bk').onclick=function(){show('home')};
+  document.getElementById('hi').onclick=function(){document.getElementById('cc').classList.remove('open');show('home')};
+  document.getElementById('pull').onclick=function(){document.getElementById('cc').classList.add('open')};
+  document.getElementById('cx').onclick=function(){document.getElementById('cc').classList.remove('open')};
+  document.querySelectorAll('[data-t]').forEach(function(t){t.onclick=function(){t.classList.toggle('on')}});
+  document.getElementById('br').oninput=function(e){document.getElementById('wall').style.filter='brightness('+(e.target.value/100)+')'};
+  document.getElementById('mb').onclick=function(){openApp('yelo','YELO')};
 
-  function openApp(id) {
-    const data = appContent[id] || { title: 'برنامه', html: '<div class="app-card"><p>این یک پیش‌نمایش رابط است.</p></div>' };
-    document.getElementById('appTitle').textContent = data.title;
-    document.getElementById('appBody').innerHTML = data.html;
-    showScreen(appWindow);
+  function tick(){
+    var n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),t=h+':'+m;
+    document.getElementById('st').textContent=t;document.getElementById('lc').textContent=t;document.getElementById('hc').textContent=t;
+    var days=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+    var months=['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
+    var d=days[n.getDay()]+' '+n.getDate()+' '+months[n.getMonth()];
+    document.getElementById('ld').textContent=d;document.getElementById('hd').textContent=days[n.getDay()];
   }
-
-  document.getElementById('appBack').addEventListener('click', function () {
-    showScreen(home);
-  });
-
-  let startY = null;
-  lock.addEventListener('touchstart', function (e) {
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-  lock.addEventListener('touchend', function (e) {
-    if (startY === null) return;
-    const dy = startY - e.changedTouches[0].clientY;
-    if (dy > 40) unlock();
-    startY = null;
-  });
-  lock.addEventListener('click', unlock);
-
-  document.getElementById('homeIndicator').addEventListener('click', function () {
-    control.classList.remove('open');
-    showScreen(home);
-  });
-
-  document.getElementById('pullZone').addEventListener('click', function () {
-    control.classList.add('open');
-  });
-  document.getElementById('ccClose').addEventListener('click', function () {
-    control.classList.remove('open');
-  });
-  document.querySelectorAll('[data-toggle]').forEach(function (tile) {
-    tile.addEventListener('click', function () {
-      tile.classList.toggle('on');
-    });
-  });
-  document.getElementById('brightness').addEventListener('input', function (e) {
-    document.querySelector('.wallpaper').style.filter = 'brightness(' + (e.target.value / 100) + ')';
-  });
-
-  function updateClock() {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const t = h + ':' + m;
-    document.getElementById('statusTime').textContent = t;
-    document.getElementById('lockClock').textContent = t;
-    document.getElementById('homeClock').textContent = t;
-    const days = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
-    const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-    const dayName = days[now.getDay()];
-    const dateText = dayName + ' · ' + now.getDate() + ' ' + months[Math.min(now.getMonth(), 11)];
-    document.getElementById('lockDate').textContent = dateText;
-    document.getElementById('homeDate').textContent = dateText;
-  }
-  updateClock();
-  setInterval(updateClock, 15000);
-
-  document.getElementById('musicBtn').addEventListener('click', function () {
-    openApp('yelo');
-  });
+  tick();setInterval(tick,20000);
 })();
 </script>
 </body>
