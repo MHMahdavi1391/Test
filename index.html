@@ -3,157 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frame Industries - اطلاعات و امنیت</title>
+    <title>Frame Industries | اطلاعات و امنیت</title>
     <style>
-        body {
-            font-family: 'Tahoma', 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
+        :root {
+            --primary: #0a2540;
+            --primary-light: #1e3a5f;
+            --accent: #c9a227;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #5a6a7a;
+            --border: #e2e8f0;
         }
-        .banner {
-            background: linear-gradient(135deg, #1a237e, #3949ab);
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .top-banner {
+            background: var(--primary);
             color: white;
             text-align: center;
-            padding: 20px;
-            font-size: 1.2em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
         }
         header {
-            background-color: #0d47a1;
-            color: white;
-            padding: 20px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 28px 20px;
             text-align: center;
         }
         header h1 {
-            margin: 0;
-            font-size: 2.5em;
+            font-size: 2.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 1px;
         }
-        header p {
-            margin: 5px 0 0;
-            opacity: 0.9;
+        header .subtitle {
+            color: var(--muted);
+            margin-top: 6px;
+            font-size: 1rem;
         }
         .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 980px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .member-section {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(10, 37, 64, 0.08);
+            padding: 40px 36px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border);
+        }
+        .member-section h2 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.4rem;
+            margin-bottom: 28px;
+            font-weight: 600;
         }
         .member-card {
             display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            align-items: center;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            background: #fafafa;
+            gap: 40px;
+            align-items: flex-start;
+            max-width: 760px;
+            margin: 0 auto;
         }
-        .member-card img {
-            width: 250px;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        .photo-wrapper {
+            flex-shrink: 0;
         }
-        .member-info h2 {
-            color: #0d47a1;
-            margin-top: 0;
+        .photo-wrapper img {
+            width: 220px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border: 3px solid white;
         }
-        .info-item {
-            margin: 10px 0;
-            font-size: 1.1em;
+        .member-details {
+            flex: 1;
+            padding-top: 8px;
         }
-        .info-item strong {
-            color: #1565c0;
+        .member-details h3 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+        .detail-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label {
+            width: 140px;
+            color: var(--muted);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .detail-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+        .title-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 12px;
         }
         section {
-            margin: 40px 0;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 36px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 16px rgba(10, 37, 64, 0.06);
+            border: 1px solid var(--border);
         }
-        h2 {
-            color: #0d47a1;
-            border-bottom: 2px solid #0d47a1;
-            padding-bottom: 10px;
+        section h2 {
+            color: var(--primary);
+            font-size: 1.35rem;
+            margin-bottom: 16px;
+            font-weight: 600;
+            border-right: 4px solid var(--accent);
+            padding-right: 12px;
+        }
+        section p {
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+        .hr-highlight {
+            background: #f8f4e9;
+            border-right: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            color: var(--primary);
         }
         footer {
-            background-color: #212121;
-            color: white;
+            background: var(--primary);
+            color: #d0d7de;
             text-align: center;
-            padding: 20px;
-            margin-top: 40px;
+            padding: 32px 20px;
+            font-size: 0.9rem;
         }
-        footer a {
-            color: #90caf9;
-            text-decoration: none;
-        }
-        @media (max-width: 600px) {
-            .member-card {
-                flex-direction: column;
-                text-align: center;
-            }
-            .member-card img {
-                width: 200px;
-            }
+        footer a { color: var(--accent); text-decoration: none; }
+        @media (max-width: 700px) {
+            .member-card { flex-direction: column; align-items: center; text-align: center; }
+            .detail-row { justify-content: center; }
+            .detail-label { width: auto; margin-left: 12px; }
+            .photo-wrapper img { width: 200px; height: 260px; }
         }
     </style>
 </head>
 <body>
-    <div class="banner">
-        پیام عمومی: با آغاز فصل پاییز ۱۴۰۵، شرکت Frame Industries بر تعهد خود به حفاظت از حقوق بشر و تقویت امنیت اطلاعات در ایران تأکید می‌کند. از همراهی شما سپاسگزاریم.
+    <div class="top-banner">
+        پیام عمومی: Frame Industries به‌عنوان یک نهاد خصوصی، بر حفاظت از حقوق بشر و تقویت امنیت اطلاعات تأکید دارد.
     </div>
 
     <header>
         <h1>Frame Industries</h1>
-        <p>شرکت خصوصی - زیرمجموعه اطلاعات و امنیت | مدافع حقوق بشر برای امنیت ایران</p>
+        <p class="subtitle">شرکت خصوصی — بخش اطلاعات و امنیت</p>
     </header>
 
     <div class="container">
-        <section>
-            <h2>شناسایی اعضای شرکت</h2>
-            <p>هدف این وب‌سایت جمع‌آوری و نمایش اطلاعات عمومی اعضای شرکت خصوصی Frame Industries است.</p>
-
+        <div class="member-section">
+            <h2>شناسایی کارکنان</h2>
             <div class="member-card">
-                <img src="photo.jpg" alt="عکس پرسنلی محمد حسین مهدوی">
-                <div class="member-info">
-                    <h2>محمد حسین مهدوی</h2>
-                    <div class="info-item"><strong>تاریخ تولد:</strong> ۱۰/۰۳/۱۳۹۱</div>
-                    <div class="info-item"><strong>شهر:</strong> شیراز</div>
-                    <div class="info-item"><strong>درجه/عنوان در شرکت:</strong> مامور ۰۰۷ اطلاعات و امنیت شرکت</div>
-                    <div class="info-item"><strong>وضعیت:</strong> عضو فعال شرکت خصوصی Frame Industries</div>
+                <div class="photo-wrapper">
+                    <img src="photo.jpg" alt="محمد حسین مهدوی">
+                </div>
+                <div class="member-details">
+                    <h3>محمد حسین مهدوی</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">تاریخ تولد</div>
+                        <div class="detail-value">۱۰/۰۳/۱۳۹۱</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">شهر</div>
+                        <div class="detail-value">شیراز</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">عنوان در شرکت</div>
+                        <div class="detail-value">مامور ۰۰۷ اطلاعات و امنیت</div>
+                    </div>
+                    <div class="title-badge">عضو فعال شرکت خصوصی</div>
                 </div>
             </div>
-        </section>
+        </div>
 
         <section>
             <h2>درباره شرکت</h2>
-            <p>Frame Industries یک شرکت خصوصی است که در زمینه اطلاعات و امنیت فعالیت می‌کند. این شرکت متعهد به دفاع از حقوق بشر و کمک به امنیت ایران از طریق روش‌های خصوصی و غیررسمی است. هیچ‌گونه وابستگی به نهادهای دولتی یا نیروی انتظامی ندارد و صرفاً یک نهاد خصوصی است.</p>
-            <p>ماموریت ما شناسایی اعضا، جمع‌آوری اطلاعات عمومی و ارائه خدمات امنیتی خصوصی در چارچوب قوانین و با احترام به حقوق افراد است.</p>
+            <p>Frame Industries یک شرکت خصوصی فعال در حوزه اطلاعات و امنیت است که با هدف تقویت امنیت پایدار و دفاع از حقوق بشر در ایران فعالیت می‌کند.</p>
+            <div class="hr-highlight">
+                <strong>تعهد به حقوق بشر:</strong> تمامی فعالیت‌های این شرکت در چارچوب احترام کامل به حقوق اساسی افراد و اصول حقوق بشر انجام می‌شود. امنیت و اطلاعات، ابزار خدمت به جامعه و حفاظت از کرامت انسانی است.
+            </div>
+            <p>این شرکت هیچ‌گونه وابستگی به نهادهای دولتی یا نیروی انتظامی ندارد و صرفاً به‌صورت خصوصی و مستقل عمل می‌کند.</p>
         </section>
 
         <section>
-            <h2>ساختار شرکت</h2>
-            <ul>
-                <li>بخش اطلاعات و امنیت</li>
-                <li>بخش حفاظت از حقوق بشر</li>
-                <li>بخش پشتیبانی اعضا</li>
-            </ul>
+            <h2>ماموریت و ساختار</h2>
+            <p>شناسایی اعضا، جمع‌آوری اطلاعات عمومی مرتبط و ارائه خدمات امنیتی خصوصی در چارچوب قوانین و با اولویت مطلق حقوق بشر.</p>
+            <p style="margin-top: 12px;">ساختار داخلی شرکت بر پایه بخش‌های اطلاعات، امنیت و حمایت از حقوق افراد طراحی شده است.</p>
         </section>
 
         <section>
             <h2>اطلاعات تکمیلی</h2>
-            <p>برای عضویت یا کسب اطلاعات بیشتر، با شرکت تماس بگیرید. تمام اطلاعات نمایش داده شده عمومی است و با رضایت اعضا منتشر شده است.</p>
-            <p>شرکت Frame Industries از حقوق بشر دفاع می‌کند و به امنیت پایدار ایران کمک می‌کند.</p>
+            <p>اطلاعات نمایش‌داده‌شده در این صفحه عمومی بوده و با رضایت اعضا منتشر شده است. هدف از این وب‌سایت، شفافیت داخلی و شناسایی منظم کارکنان شرکت خصوصی Frame Industries است.</p>
         </section>
     </div>
 
     <footer>
-        <p>&copy; ۱۴۰۵ Frame Industries - شرکت خصوصی اطلاعات و امنیت</p>
-        <p>تمامی حقوق محفوظ است. | <a href="#">حریم خصوصی</a> | <a href="#">تماس با ما</a></p>
-        <p>این وب‌سایت صرفاً برای اهداف شناسایی داخلی اعضای شرکت خصوصی طراحی شده است.</p>
+        <p>© ۱۴۰۵ Frame Industries — شرکت خصوصی اطلاعات و امنیت</p>
+        <p style="margin-top: 8px;">تعهد به حقوق بشر و امنیت پایدار</p>
     </footer>
 </body>
 </html>
