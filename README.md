@@ -1,1 +1,19 @@
-This repository has been emptied.
+# Frame Industries — Spatial Hub (WebXR)
+
+نسخه فضایی صفحه اصلی برای **Meta Quest Browser**.
+
+## چطور باز کنم
+1. روی Meta Quest بروزر این آدرس رو باز کن:
+   ```
+   https://mhmahdavi1391.github.io/Test/
+   ```
+2. دکمه **Enter VR** رو بزن.
+3. پنل‌های شناور رو با کنترلر (تریگر) یا دست (پینچ) بگیر و جابجا کن.
+
+## ویژگی‌ها
+- محیط تیره با تم رنگی سایت اصلی
+- پنل‌های سه‌بعدی قابل گرفتن (grabbable)
+- پشتیبانی از کنترلر و دست
+- محتوای صفحه اصلی به صورت فضایی
+
+ساخته شده با **A-Frame** + WebXR.
