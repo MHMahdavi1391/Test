@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frame Industries | Spatial Hub | Meta Quest</title>
+  <meta name="theme-color" content="#0a0a12">
+  <meta name="color-scheme" content="dark">
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js"></script>
+  <style>
+    body { margin: 0; background: #0a0a12; color: #e8e8f0; font-family: system-ui, sans-serif; }
+    .info {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(10,10,18,0.85); padding: 12px 20px; border-radius: 12px;
+      border: 1px solid rgba(101,46,166,0.4); text-align: center; max-width: 90%;
+      backdrop-filter: blur(10px); z-index: 100; font-size: 14px;
+    }
+    .info a { color: #42D2D3; }
+  </style>
+</head>
+<body>
+  <div class="info">
+    در Meta Quest Browser باز کن → دکمه <strong>Enter VR</strong> رو بزن → با کنترلر یا دست پنل‌ها رو بگیر و جابجا کن.<br>
+    <a href="https://frame.iddns.ir" target="_blank">بازگشت به هاب دوبعدی</a>
+  </div>
+
+  <a-scene
+    renderer="antialias: true; colorManagement: true;"
+    background="color: #0a0a12"
+    fog="type: linear; color: #0a0a12; near: 10; far: 40"
+    vr-mode-ui="enabled: true"
+    hand-tracking-controls="enabled: true"
+    loading-screen="dotsColor: #42D2D3; backgroundColor: #0a0a12">
+
+    <!-- Lighting -->
+    <a-entity light="type: ambient; color: #1a1228; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; color: #7c4dff; intensity: 0.8" position="-2 4 1"></a-entity>
+    <a-entity light="type: point; color: #42D2D3; intensity: 0.5; distance: 15" position="2 2 2"></a-entity>
+
+    <!-- Floor -->
+    <a-plane
+      position="0 0 0"
+      rotation="-90 0 0"
+      width="20" height="20"
+      color="#0f0f1a"
+      metalness="0.2" roughness="0.8"
+      shadow></a-plane>
+
+    <!-- Grid lines -->
+    <a-entity position="0 0.01 0" rotation="-90 0 0">
+      <a-plane width="20" height="20" color="#652EA6" opacity="0.15" material="shader: flat"></a-plane>
+    </a-entity>
+
+    <!-- Central logo / title -->
+    <a-text
+      value="Frame Industries"
+      position="0 2.2 -4"
+      align="center"
+      color="#ffffff"
+      width="6"
+      font="https://cdn.aframe.io/fonts/Roboto-msdf.json"
+      negate="false">
+    </a-text>
+    <a-text
+      value="Beyond the Frame."
+      position="0 1.7 -4"
+      align="center"
+      color="#42D2D3"
+      width="4"
+      font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+    </a-text>
+
+    <!-- Floating interactive panels (grabbable) -->
+    <!-- About -->
+    <a-entity
+      id="panel-about"
+      class="grabbable"
+      position="-2.2 1.4 -3.5"
+      grabbable
+      dynamic-body="mass: 1">
+      <a-box
+        width="1.4" height="0.9" depth="0.04"
+        color="#1a1228"
+        material="metalness: 0.3; roughness: 0.4"
+        class="clickable">
+        <a-text
+          value="درباره \nشرکت فناوری دیجیتال"
+          position="0 0.15 0.03"
+          align="center"
+          color="#ffffff"
+          width="1.2"
+          font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+        </a-text>
+      </a-box>
+    </a-entity>
+
+    <!-- Projects -->
+    <a-entity
+      id="panel-projects"
+      class="grabbable"
+      position="0 1.4 -3.5"
+      grabbable
+      dynamic-body="mass: 1">
+      <a-box
+        width="1.4" height="0.9" depth="0.04"
+        color="#1a1228"
+        material="metalness: 0.3; roughness: 0.4"
+        class="clickable">
+        <a-text
+          value="پروژه‌ها \nYELO · VR · 3D"
+          position="0 0.1 0.03"
+          align="center"
+          color="#42D2D3"
+          width="1.2"
+          font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+        </a-text>
+      </a-box>
+    </a-entity>
+
+    <!-- Founder -->
+    <a-entity
+      id="panel-founder"
+      class="grabbable"
+      position="2.2 1.4 -3.5"
+      grabbable
+      dynamic-body="mass: 1">
+      <a-box
+        width="1.4" height="0.9" depth="0.04"
+        color="#1a1228"
+        material="metalness: 0.3; roughness: 0.4"
+        class="clickable">
+        <a-text
+          value="بنیان‌گذار \nمحمد حسین مهدوی"
+          position="0 0.15 0.03"
+          align="center"
+          color="#ffffff"
+          width="1.2"
+          font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+        </a-text>
+      </a-box>
+    </a-entity>
+
+    <!-- Contact / Phone -->
+    <a-entity
+      id="panel-contact"
+      class="grabbable"
+      position="0 0.4 -3.2"
+      grabbable
+      dynamic-body="mass: 1">
+      <a-box
+        width="1.6" height="0.7" depth="0.04"
+        color="#122028"
+        material="metalness: 0.3; roughness: 0.4"
+        class="clickable">
+        <a-text
+          value="تماس \n0936 233 5266"
+          position="0 0.05 0.03"
+          align="center"
+          color="#42D2D3"
+          width="1.4"
+          font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+        </a-text>
+      </a-box>
+    </a-entity>
+
+    <!-- Decorative floating cubes -->
+    <a-box
+      position="-3.5 1.8 -2"
+      width="0.3" height="0.3" depth="0.3"
+      color="#652EA6"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
+      class="grabbable"
+      grabbable
+      dynamic-body="mass: 0.5">
+    </a-box>
+    <a-box
+      position="3.5 1.6 -2.5"
+      width="0.25" height="0.25" depth="0.25"
+      color="#42D2D3"
+      animation="property: rotation; to: 360 0 0; loop: true; dur: 6000; easing: linear"
+      class="grabbable"
+      grabbable
+      dynamic-body="mass: 0.5">
+    </a-box>
+
+    <!-- Controllers / Hands -->
+    <a-entity id="leftHand" hand-tracking-controls="hand: left; modelColor: #7c4dff"></a-entity>
+    <a-entity id="rightHand" hand-tracking-controls="hand: right; modelColor: #42D2D3"></a-entity>
+    <a-entity laser-controls="hand: left" raycaster="objects: .clickable, .grabbable"></a-entity>
+    <a-entity laser-controls="hand: right" raycaster="objects: .clickable, .grabbable"></a-entity>
+
+    <!-- Camera / Player -->
+    <a-entity id="rig" position="0 0 1.5">
+      <a-camera
+        look-controls
+        wasd-controls="acceleration: 20"
+        position="0 1.6 0">
+      </a-camera>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    // Simple click feedback
+    document.addEventListener('click', function (e) {
+      const el = e.target.closest('.clickable');
+      if (!el) return;
+      const parent = el.parentEl;
+      if (parent) {
+        parent.setAttribute('animation', {
+          property: 'scale',
+          to: '1.08 1.08 1.08',
+          dur: 150,
+          dir: 'alternate',
+          loop: 1
+        });
+      }
+    });
+  </script>
+</body>
+</html>
