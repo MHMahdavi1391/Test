@@ -21,168 +21,198 @@
 </head>
 <body>
   <div class="info">
-    در Meta Quest Browser باز کن → دکمه <strong>Enter VR</strong> رو بزن → با کنترلر یا دست پنل‌ها رو بگیر و جابجا کن.<br>
+    در Meta Quest Browser باز کن → دکمه <strong>Enter VR</strong> رو بزن → پنل‌ها رو بگیر و جابجا کن.<br>
     <a href="https://frame.iddns.ir" target="_blank">بازگشت به هاب دوبعدی</a>
   </div>
 
   <a-scene
-    renderer="antialias: true; colorManagement: true;"
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true;"
     background="color: #0a0a12"
-    fog="type: linear; color: #0a0a12; near: 10; far: 40"
+    fog="type: exponential; color: #0a0a12; density: 0.04"
     vr-mode-ui="enabled: true"
     hand-tracking-controls="enabled: true"
-    loading-screen="dotsColor: #42D2D3; backgroundColor: #0a0a12">
+    loading-screen="dotsColor: #42D2D3; backgroundColor: #0a0a12"
+    shadow="type: pcfsoft">
+
+    <!-- Ambient spatial sound -->
+    <a-sound src="https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749e841.mp3"
+             autoplay="true" loop="true" volume="0.25"
+             position="0 1.5 -2"></a-sound>
+
+    <!-- Interaction sound (short soft click) -->
+    <a-sound id="sfx-click" src="https://cdn.pixabay.com/audio/2021/08/09/audio_12b0c7443c.mp3"
+             volume="0.4"></a-sound>
 
     <!-- Lighting -->
-    <a-entity light="type: ambient; color: #1a1228; intensity: 0.6"></a-entity>
-    <a-entity light="type: directional; color: #7c4dff; intensity: 0.8" position="-2 4 1"></a-entity>
-    <a-entity light="type: point; color: #42D2D3; intensity: 0.5; distance: 15" position="2 2 2"></a-entity>
+    <a-entity light="type: ambient; color: #1a1228; intensity: 0.4"></a-entity>
+    <a-entity light="type: directional; color: #7c4dff; intensity: 0.7; castShadow: true" position="-3 6 2"></a-entity>
+    <a-entity light="type: point; color: #42D2D3; intensity: 0.6; distance: 12" position="1.5 2.5 1"></a-entity>
+    <a-entity light="type: point; color: #652EA6; intensity: 0.4; distance: 10" position="-2 2 -1"></a-entity>
 
-    <!-- Floor -->
+    <!-- Floor with subtle reflection -->
     <a-plane
       position="0 0 0"
       rotation="-90 0 0"
-      width="20" height="20"
-      color="#0f0f1a"
-      metalness="0.2" roughness="0.8"
+      width="24" height="24"
+      color="#0c0c16"
+      metalness="0.4" roughness="0.6"
       shadow></a-plane>
 
-    <!-- Grid lines -->
-    <a-entity position="0 0.01 0" rotation="-90 0 0">
-      <a-plane width="20" height="20" color="#652EA6" opacity="0.15" material="shader: flat"></a-plane>
+    <!-- Soft grid -->
+    <a-entity position="0 0.005 0" rotation="-90 0 0">
+      <a-plane width="24" height="24" color="#652EA6" opacity="0.12" material="shader: flat"></a-plane>
     </a-entity>
 
-    <!-- Central logo / title -->
-    <a-text
-      value="Frame Industries"
-      position="0 2.2 -4"
-      align="center"
-      color="#ffffff"
-      width="6"
-      font="https://cdn.aframe.io/fonts/Roboto-msdf.json"
-      negate="false">
-    </a-text>
-    <a-text
-      value="Beyond the Frame."
-      position="0 1.7 -4"
-      align="center"
-      color="#42D2D3"
-      width="4"
-      font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
-    </a-text>
+    <!-- Central title with gentle float -->
+    <a-entity position="0 2.3 -5" animation="property: position; to: 0 2.45 -5; loop: true; dir: alternate; dur: 4000; easing: easeInOutSine">
+      <a-text
+        value="Frame Industries"
+        align="center"
+        color="#ffffff"
+        width="5.5"
+        font="https://cdn.aframe.io/fonts/Roboto-msdf.json"
+        negate="false">
+      </a-text>
+      <a-text
+        value="Beyond the Frame."
+        position="0 -0.45 0"
+        align="center"
+        color="#42D2D3"
+        width="3.8"
+        font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+      </a-text>
+    </a-entity>
 
-    <!-- Floating interactive panels (grabbable) -->
-    <!-- About -->
+    <!-- Floating interactive panels with hover + grab -->
     <a-entity
       id="panel-about"
       class="grabbable"
-      position="-2.2 1.4 -3.5"
+      position="-2.4 1.5 -3.8"
       grabbable
-      dynamic-body="mass: 1">
+      dynamic-body="mass: 0.8"
+      animation="property: position; to: -2.4 1.65 -3.8; loop: true; dir: alternate; dur: 3500; easing: easeInOutSine">
       <a-box
-        width="1.4" height="0.9" depth="0.04"
+        width="1.5" height="0.95" depth="0.05"
         color="#1a1228"
-        material="metalness: 0.3; roughness: 0.4"
-        class="clickable">
+        material="metalness: 0.5; roughness: 0.3; emissive: #2a1848; emissiveIntensity: 0.15"
+        class="clickable"
+        animation__hover="property: material.emissiveIntensity; to: 0.4; startEvents: mouseenter; dur: 200"
+        animation__unhover="property: material.emissiveIntensity; to: 0.15; startEvents: mouseleave; dur: 300">
         <a-text
-          value="درباره \nشرکت فناوری دیجیتال"
-          position="0 0.15 0.03"
+          value="درباره\nشرکت فناوری دیجیتال"
+          position="0 0.12 0.03"
           align="center"
           color="#ffffff"
-          width="1.2"
+          width="1.3"
           font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
         </a-text>
       </a-box>
     </a-entity>
 
-    <!-- Projects -->
     <a-entity
       id="panel-projects"
       class="grabbable"
-      position="0 1.4 -3.5"
+      position="0 1.5 -3.8"
       grabbable
-      dynamic-body="mass: 1">
+      dynamic-body="mass: 0.8"
+      animation="property: position; to: 0 1.68 -3.8; loop: true; dir: alternate; dur: 4200; easing: easeInOutSine">
       <a-box
-        width="1.4" height="0.9" depth="0.04"
+        width="1.5" height="0.95" depth="0.05"
         color="#1a1228"
-        material="metalness: 0.3; roughness: 0.4"
-        class="clickable">
+        material="metalness: 0.5; roughness: 0.3; emissive: #183848; emissiveIntensity: 0.15"
+        class="clickable"
+        animation__hover="property: material.emissiveIntensity; to: 0.45; startEvents: mouseenter; dur: 200"
+        animation__unhover="property: material.emissiveIntensity; to: 0.15; startEvents: mouseleave; dur: 300">
         <a-text
-          value="پروژه‌ها \nYELO · VR · 3D"
-          position="0 0.1 0.03"
+          value="پروژه‌ها\nYELO · VR · 3D"
+          position="0 0.08 0.03"
           align="center"
           color="#42D2D3"
-          width="1.2"
+          width="1.3"
           font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
         </a-text>
       </a-box>
     </a-entity>
 
-    <!-- Founder -->
     <a-entity
       id="panel-founder"
       class="grabbable"
-      position="2.2 1.4 -3.5"
+      position="2.4 1.5 -3.8"
       grabbable
-      dynamic-body="mass: 1">
+      dynamic-body="mass: 0.8"
+      animation="property: position; to: 2.4 1.62 -3.8; loop: true; dir: alternate; dur: 3800; easing: easeInOutSine">
       <a-box
-        width="1.4" height="0.9" depth="0.04"
+        width="1.5" height="0.95" depth="0.05"
         color="#1a1228"
-        material="metalness: 0.3; roughness: 0.4"
-        class="clickable">
+        material="metalness: 0.5; roughness: 0.3; emissive: #2a1848; emissiveIntensity: 0.15"
+        class="clickable"
+        animation__hover="property: material.emissiveIntensity; to: 0.4; startEvents: mouseenter; dur: 200"
+        animation__unhover="property: material.emissiveIntensity; to: 0.15; startEvents: mouseleave; dur: 300">
         <a-text
-          value="بنیان‌گذار \nمحمد حسین مهدوی"
-          position="0 0.15 0.03"
+          value="بنیان‌گذار\nمحمد حسین مهدوی"
+          position="0 0.12 0.03"
           align="center"
           color="#ffffff"
-          width="1.2"
+          width="1.3"
           font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
         </a-text>
       </a-box>
     </a-entity>
 
-    <!-- Contact / Phone -->
     <a-entity
       id="panel-contact"
       class="grabbable"
-      position="0 0.4 -3.2"
+      position="0 0.45 -3.4"
       grabbable
-      dynamic-body="mass: 1">
+      dynamic-body="mass: 0.8"
+      animation="property: position; to: 0 0.58 -3.4; loop: true; dir: alternate; dur: 4500; easing: easeInOutSine">
       <a-box
-        width="1.6" height="0.7" depth="0.04"
+        width="1.7" height="0.75" depth="0.05"
         color="#122028"
-        material="metalness: 0.3; roughness: 0.4"
-        class="clickable">
+        material="metalness: 0.5; roughness: 0.3; emissive: #183848; emissiveIntensity: 0.2"
+        class="clickable"
+        animation__hover="property: material.emissiveIntensity; to: 0.5; startEvents: mouseenter; dur: 200"
+        animation__unhover="property: material.emissiveIntensity; to: 0.2; startEvents: mouseleave; dur: 300">
         <a-text
-          value="تماس \n0936 233 5266"
-          position="0 0.05 0.03"
+          value="تماس\n0936 233 5266"
+          position="0 0.04 0.03"
           align="center"
           color="#42D2D3"
-          width="1.4"
+          width="1.5"
           font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
         </a-text>
       </a-box>
     </a-entity>
 
-    <!-- Decorative floating cubes -->
+    <!-- Decorative floating glowing cubes -->
     <a-box
-      position="-3.5 1.8 -2"
-      width="0.3" height="0.3" depth="0.3"
+      position="-3.8 1.9 -2.2"
+      width="0.28" height="0.28" depth="0.28"
       color="#652EA6"
-      animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
+      material="emissive: #652EA6; emissiveIntensity: 0.6"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 9000; easing: linear"
+      animation__float="property: position; to: -3.8 2.15 -2.2; loop: true; dir: alternate; dur: 3200; easing: easeInOutSine"
       class="grabbable"
       grabbable
-      dynamic-body="mass: 0.5">
+      dynamic-body="mass: 0.4">
     </a-box>
     <a-box
-      position="3.5 1.6 -2.5"
-      width="0.25" height="0.25" depth="0.25"
+      position="3.8 1.7 -2.6"
+      width="0.24" height="0.24" depth="0.24"
       color="#42D2D3"
-      animation="property: rotation; to: 360 0 0; loop: true; dur: 6000; easing: linear"
+      material="emissive: #42D2D3; emissiveIntensity: 0.7"
+      animation="property: rotation; to: 360 0 180; loop: true; dur: 7000; easing: linear"
+      animation__float="property: position; to: 3.8 1.95 -2.6; loop: true; dir: alternate; dur: 2800; easing: easeInOutSine"
       class="grabbable"
       grabbable
-      dynamic-body="mass: 0.5">
+      dynamic-body="mass: 0.4">
     </a-box>
+
+    <!-- Small floating light orbs -->
+    <a-sphere position="-1.5 2.8 -3" radius="0.08" color="#42D2D3" material="emissive: #42D2D3; emissiveIntensity: 1"
+              animation="property: position; to: -1.5 3.05 -3; loop: true; dir: alternate; dur: 2500"></a-sphere>
+    <a-sphere position="1.8 2.6 -4" radius="0.06" color="#7c4dff" material="emissive: #7c4dff; emissiveIntensity: 1"
+              animation="property: position; to: 1.8 2.85 -4; loop: true; dir: alternate; dur: 3000"></a-sphere>
 
     <!-- Controllers / Hands -->
     <a-entity id="leftHand" hand-tracking-controls="hand: left; modelColor: #7c4dff"></a-entity>
@@ -191,10 +221,10 @@
     <a-entity laser-controls="hand: right" raycaster="objects: .clickable, .grabbable"></a-entity>
 
     <!-- Camera / Player -->
-    <a-entity id="rig" position="0 0 1.5">
+    <a-entity id="rig" position="0 0 1.8">
       <a-camera
         look-controls
-        wasd-controls="acceleration: 20"
+        wasd-controls="acceleration: 25"
         position="0 1.6 0">
       </a-camera>
     </a-entity>
@@ -202,16 +232,24 @@
   </a-scene>
 
   <script>
-    // Simple click feedback
+    const clickSound = document.querySelector('#sfx-click');
+
     document.addEventListener('click', function (e) {
       const el = e.target.closest('.clickable');
       if (!el) return;
+
+      // Play interaction sound
+      if (clickSound && clickSound.components.sound) {
+        clickSound.components.sound.playSound();
+      }
+
+      // Scale pulse
       const parent = el.parentEl;
       if (parent) {
-        parent.setAttribute('animation', {
+        parent.setAttribute('animation__pulse', {
           property: 'scale',
-          to: '1.08 1.08 1.08',
-          dur: 150,
+          to: '1.06 1.06 1.06',
+          dur: 180,
           dir: 'alternate',
           loop: 1
         });
